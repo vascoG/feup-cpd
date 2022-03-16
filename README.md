@@ -1,6 +1,6 @@
 # CPD Projects
 
-CPD Projects of group T09&lt;m&gt;&lt;n&gt;G&lt;p&gt;&lt;q&gt;.
+CPD Projects of group T&lt;0&gt;&lt;9&gt;G&lt;0&gt;&lt;6&gt;.
 
 Group members:
 
