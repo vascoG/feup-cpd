@@ -10,7 +10,7 @@ public class Store implements RMIServer{
 
     private String ip_mcast_addr;
     private String ip_mcast_port;
-    private int node_id;
+    private String node_id;
     private int store_port;
 
     private File membership_log;
@@ -19,14 +19,14 @@ public class Store implements RMIServer{
     public Store(String ip_mcast_addr, String ip_mcast_port, String node_id, String store_port) {
         this.ip_mcast_addr = ip_mcast_addr;
         this.ip_mcast_port = ip_mcast_port;
-        this.node_id = Integer.parseInt(node_id);
+        this.node_id = node_id;
         this.store_port = Integer.parseInt(store_port);
 
-        membership_log = new File("membership_log");
-        membership_counter = new File("membership_counter");
+        membership_log = new File("membership_log.txt");
+        membership_counter = new File("membership_counter.txt");
         try {
             if(membership_counter.createNewFile())
-                writeToCounter(0);
+                writeToCounter("0");
             if(membership_log.createNewFile())
                 writeToLog(node_id + "-0");
         } catch (IOException e) {
@@ -47,7 +47,7 @@ public class Store implements RMIServer{
         }
     }
 
-    public void writeToCounter(int arg)
+    public void writeToCounter(String arg)
     {
         FileWriter fw;
         try {
@@ -76,11 +76,11 @@ public class Store implements RMIServer{
         this.ip_mcast_port = ip_mcast_port;
     }
 
-    public int getNode_id() {
+    public String getNode_id() {
         return node_id;
     }
 
-    public void setNode_id(int node_id) {
+    public void setNode_id(String node_id) {
         this.node_id = node_id;
     }
 
@@ -111,8 +111,10 @@ public class Store implements RMIServer{
     public static void main(String args[]) {
 
         //args
-        if(args.length!=4)
+        if(args.length!=4) {
             System.err.println("Store exception: Wrong number of arguments!");
+            return;
+        }
         try {
 
             Store obj = new Store(args[0],args[1],args[2],args[3]);
