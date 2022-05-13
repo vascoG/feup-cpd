@@ -9,21 +9,31 @@ import java.rmi.server.UnicastRemoteObject;
 public class Store implements RMIServer{
 
     private String ip_mcast_addr;
-    private String ip_mcast_port;
+    private int ip_mcast_port;
     private String node_id;
     private int store_port;
 
     private File membership_log;
     private File membership_counter;
 
+    private MembershipProtocol protocol;
+
     public Store(String ip_mcast_addr, String ip_mcast_port, String node_id, String store_port) {
         this.ip_mcast_addr = ip_mcast_addr;
-        this.ip_mcast_port = ip_mcast_port;
+        this.ip_mcast_port = Integer.parseInt(ip_mcast_port);
         this.node_id = node_id;
         this.store_port = Integer.parseInt(store_port);
 
-        membership_log = new File("membership_log.txt");
-        membership_counter = new File("membership_counter.txt");
+        this.protocol = new MembershipProtocol(this.ip_mcast_addr, this.ip_mcast_port, this.node_id, this.store_port, this.membership_log, this.membership_counter);
+
+        String parent_dir = "./"+node_id+"/";
+
+        File directory = new File(parent_dir);
+        if(!directory.exists())
+            directory.mkdirs();
+
+        membership_log = new File(parent_dir+"/membership_log.txt");
+        membership_counter = new File(parent_dir+"/membership_counter.txt");
         try {
             if(membership_counter.createNewFile())
                 writeToCounter("0");
@@ -68,11 +78,11 @@ public class Store implements RMIServer{
         this.ip_mcast_addr = ip_mcast_addr;
     }
 
-    public String getIp_mcast_port() {
+    public int getIp_mcast_port() {
         return ip_mcast_port;
     }
 
-    public void setIp_mcast_port(String ip_mcast_port) {
+    public void setIp_mcast_port(int ip_mcast_port) {
         this.ip_mcast_port = ip_mcast_port;
     }
 
@@ -100,6 +110,9 @@ public class Store implements RMIServer{
 
     @Override
     public String join() throws RemoteException {
+
+    
+
         // TODO Auto-generated method stub
         return null;
     }
@@ -119,8 +132,6 @@ public class Store implements RMIServer{
 
             Store obj = new Store(args[0],args[1],args[2],args[3]);
             RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(obj, obj.getStore_port());
-
-            // Bind the remote object's stub in the registry
             Registry registry = LocateRegistry.getRegistry();
             registry.bind("Node", stub);
 
@@ -129,6 +140,11 @@ public class Store implements RMIServer{
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
         }
+
+
+        //criar threads de escuta para multicast e unicast
+
+
     }
     
 }
