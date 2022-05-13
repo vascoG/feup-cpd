@@ -43,9 +43,6 @@ public class MembershipProtocol {
             e.printStackTrace();
             return;
         }
-
-        // Receber membership logs
-
         // Atualizar chaves 
     }
 }

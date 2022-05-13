@@ -34,14 +34,8 @@ public class Store implements RMIServer{
 
         membership_log = new File(parent_dir+"/membership_log.txt");
         membership_counter = new File(parent_dir+"/membership_counter.txt");
-        try {
-            if(membership_counter.createNewFile())
-                writeToCounter("0");
-            if(membership_log.createNewFile())
-                writeToLog(node_id + "-0");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writeToCounter("0");
+        writeToLog(node_id + "-0");
     }
 
     public void writeToLog(String arg) {
@@ -110,9 +104,6 @@ public class Store implements RMIServer{
 
     @Override
     public String join() throws RemoteException {
-
-    
-
         // TODO Auto-generated method stub
         return null;
     }
@@ -142,7 +133,7 @@ public class Store implements RMIServer{
         }
 
 
-        //criar threads de escuta para multicast e unicast
+        //criar threads de escuta para multicast(so dar start apos o join)
 
 
     }
