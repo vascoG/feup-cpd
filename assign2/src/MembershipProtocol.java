@@ -31,20 +31,20 @@ public class MembershipProtocol {
                     System.out.println("LISTENING TO PORT " + store_port);
                     int counter =0;
                     while(counter < 3){
-                    Socket socket = serverSocket.accept();
-                    System.out.println("Accepted conection");
-                InputStream input = socket.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
- 
-                String message = reader.readLine();
-                System.out.println(message);
-                message = reader.readLine();
-                System.out.println(message);
-                //TODO: Atualiza MembershipLog
-
-                socket.close();
-                counter++;
-            } 
+                        Socket socket = serverSocket.accept();
+                        System.out.println("Accepted conection");
+                        InputStream input = socket.getInputStream();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+        
+                        String message = reader.readLine();
+                        System.out.println(message);
+                        message = reader.readLine();
+                        System.out.println(message);
+                        //TODO: Atualiza MembershipLog
+                        //TODO: Better while condition (different logs?)
+                        socket.close();
+                        counter++;
+                    } 
                 serverSocket.close();
                 System.out.println("CLOSED");
                 } catch (IOException e) {
@@ -65,7 +65,7 @@ public class MembershipProtocol {
             multi_cast_socket.joinGroup(InetAddress.getByName(ip_mcast_addr));
             //create JOIN Message, counter can be different than 0
             String msg = "JOIN "+node_id+" "+store_port+" 0";
-            DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName(ip_mcast_addr), ip_mcast_port);
+            DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName(ip_mcast_addr), ip_mcast_port);//so 2 argumentos?
             multi_cast_socket.send(datagram_packet);
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -85,8 +85,6 @@ public class MembershipProtocol {
 
         //get log and table (maybe 2 threads)
         String log = getMembershipLog(ipAddress);
-
-        //getMembersTable(ipAddress);
 
         try {
             System.out.println("TRYING TO CONNECT TO SOCKET " + sender_port);

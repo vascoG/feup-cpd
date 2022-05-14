@@ -67,7 +67,6 @@ public class Message {
                 break;
             case MEMBERSHIP:
             ArrayList<String> logLine = new ArrayList<>(Arrays.asList(headerLines.remove(0).split("\\s+")));
-            //ArrayList<String> tableLine = new ArrayList<>(Arrays.asList(headerLines.remove(0).split("\\s+")));
             //TODO: Process stuff
             default:
                 break;

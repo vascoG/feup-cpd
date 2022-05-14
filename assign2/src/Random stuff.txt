@@ -30,6 +30,7 @@ O servidor tem uma pasta associada e dentro tem os ficheiros
 
 TODO: 
 Melhorar/acabar class Message
-	Quando é MEMBERSHIP, assumir que há 3 lines, uma para MEMBERSHIP IP PORT, outra para log e outra para a tabela
+	Quando é MEMBERSHIP, assumir que há 2 lines, uma para MEMBERSHIP IP PORT, outra para log
 Atualizar MembershipLog quando recebe um MEMBERSHIP Message
-Criar ficheiro com todos os nós presentes e respetivo id e port(tabela) e atualizar quando há join
+Script para correr automaticamente
+TestClient - join
