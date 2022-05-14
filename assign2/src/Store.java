@@ -1,6 +1,10 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -24,7 +28,7 @@ public class Store implements RMIServer{
         this.node_id = node_id;
         this.store_port = Integer.parseInt(store_port);
 
-        this.protocol = new MembershipProtocol(this.ip_mcast_addr, this.ip_mcast_port, this.node_id, this.store_port, this.membership_log, this.membership_counter);
+        this.protocol = new MembershipProtocol();
 
         String parent_dir = "./"+node_id+"/";
 
@@ -32,8 +36,8 @@ public class Store implements RMIServer{
         if(!directory.exists())
             directory.mkdirs();
 
-        membership_log = new File(parent_dir+"/membership_log.txt");
-        membership_counter = new File(parent_dir+"/membership_counter.txt");
+        membership_log = new File(parent_dir+"membership_log.txt");
+        membership_counter = new File(parent_dir+"membership_counter.txt");
         writeToCounter("0");
         writeToLog(node_id + "-0");
     }
@@ -42,9 +46,8 @@ public class Store implements RMIServer{
         FileWriter fw;
         try {
             //test if there are 32 events to delete the older ones
-            fw = new FileWriter(membership_log,true);
+            fw = new FileWriter(membership_log);
             fw.write(arg);
-            fw.write(System.getProperty("line.separator"));
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,7 +107,7 @@ public class Store implements RMIServer{
 
     @Override
     public String join() throws RemoteException {
-        // TODO Auto-generated method stub
+        protocol.join(this.ip_mcast_addr,this.ip_mcast_port,this.node_id,this.store_port);
         return null;
     }
 
@@ -119,9 +122,11 @@ public class Store implements RMIServer{
             System.err.println("Store exception: Wrong number of arguments!");
             return;
         }
+        Store obj = new Store(args[0],args[1],args[2],args[3]);
+        /*
         try {
 
-            Store obj = new Store(args[0],args[1],args[2],args[3]);
+           
             RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(obj, obj.getStore_port());
             Registry registry = LocateRegistry.getRegistry();
             registry.bind("Node", stub);
@@ -130,12 +135,30 @@ public class Store implements RMIServer{
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
-        }
+        }*/
 
 
         //criar threads de escuta para multicast(so dar start apos o join)
+        ReceiverThread receiver_thread = new ReceiverThread(obj.getIp_mcast_addr(), obj.getIp_mcast_port(), obj.getNode_id(), obj.getStore_port());
+        new Thread(receiver_thread).start();
+
+
+        Thread thread2 = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    obj.join();
+                } catch (RemoteException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } 
+            }
+            
+        });
+        thread2.start();
 
 
     }
-    
+    //java Store 224.0.0.0 4003 172.0.0.1 8000
 }

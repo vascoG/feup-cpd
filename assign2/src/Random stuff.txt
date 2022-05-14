@@ -1,0 +1,35 @@
+2 programas:
+	Store - servidor -> executa continuamente
+	TestClient - para testar os comandos -> executa e termina
+
+Cada comando Store invoca um servidor:
+	ID -> 127.0.0.1 , 127.0.0.2, etc.,
+	port -> igual em todos
+
+Cada servidor tem uma tabela para saber as keys dos outros servidores. As keys são o hash baseado no ip.
+
+Usar ThreadPool para fixar o nº de threads e temos uma fila de tarefas e vão sendo consumidas consoante os threads estão livres. 
+	ThreadPoolExecuter executor = new ...
+	executor.submit(<função>), isto execute a função ou coloca-a na fila se estiverem todos ocupados
+
+
+Sincronização: Por exemplo put e um join ao mesmo tempo, o java já tem mecanismos de sincronização de threads.
+
+
+Após o Store, o nó não pertence à rede, só após o JOIN através do TestClient
+
+Multicast = de um para muitos
+
+Guardar ficheiros através do put(<caminho do ficheiro>): lê ficheiro, criar hash key (string, já existe métodos em java) baseado no conteúdo do ficheiro, comunica a um servidor a chave. Se esse nó não é responsável por essa chave, manda para o nó responsável
+
+O servidor tem uma pasta associada e dentro tem os ficheiros
+
+
+
+------
+
+TODO: 
+Melhorar/acabar class Message
+	Quando é MEMBERSHIP, assumir que há 3 lines, uma para MEMBERSHIP IP PORT, outra para log e outra para a tabela
+Atualizar MembershipLog quando recebe um MEMBERSHIP Message
+Criar ficheiro com todos os nós presentes e respetivo id e port(tabela) e atualizar quando há join
