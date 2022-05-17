@@ -123,19 +123,18 @@ public class Store implements RMIServer{
             return;
         }
         Store obj = new Store(args[0],args[1],args[2],args[3]);
-        /*
+        
         try {
 
-           
             RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(obj, obj.getStore_port());
             Registry registry = LocateRegistry.getRegistry();
-            registry.bind("Node", stub);
+            registry.bind("Store", stub);
 
             System.err.println("Server ready");
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
-        }*/
+        }
 
 
         //criar threads de escuta para multicast(so dar start apos o join)
@@ -143,20 +142,7 @@ public class Store implements RMIServer{
         new Thread(receiver_thread).start();
 
 
-        Thread thread2 = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    obj.join();
-                } catch (RemoteException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } 
-            }
-            
-        });
-        thread2.start();
+        
 
 
     }
