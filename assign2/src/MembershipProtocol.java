@@ -1,12 +1,4 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -38,9 +30,13 @@ public class MembershipProtocol {
         
                         String message = reader.readLine();
                         System.out.println(message);
-                        message = reader.readLine();
-                        System.out.println(message);
-                        //TODO: Atualiza MembershipLog
+                        String membership = reader.readLine();
+                        System.out.println(membership);
+                        String log = getMembershipLog(node_id);
+                        if(!membership.equals(log) && counter!=0){
+                            System.out.println("Membership logs different");
+                        }
+                        setMembershipLog(membership,node_id);
                         //TODO: Better while condition (different logs?)
                         socket.close();
                         counter++;
@@ -117,6 +113,32 @@ public class MembershipProtocol {
         } catch (IOException e) {
             e.printStackTrace();
             return "ERROR";
+        }
+    }
+
+    public void setMembershipLog(String log,String node_id) {
+        FileWriter fw;
+        try {
+            File file = new File("./"+node_id+"/membership_log.txt");
+            fw = new FileWriter(file);
+            fw.write(log);
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void updateMembershipLog(Message message, String node_id, int node_port) {
+        FileWriter fw;
+        //32 logs
+        //procurar se o id ja existe se sim eliminar e atualizar (counter é diferente)
+        try {
+            File file = new File("./"+node_id+"/membership_log.txt");
+            fw = new FileWriter(file,true);
+            String log= " " + message.getSender_id() + "-" + message.getMembership_counter();
+            fw.write(log);
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
