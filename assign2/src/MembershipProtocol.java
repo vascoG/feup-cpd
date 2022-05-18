@@ -134,11 +134,18 @@ public class MembershipProtocol {
         try {
             File file = new File("./"+node_id+"/membership_log.txt");
             fw = new FileWriter(file,true);
+            checkMembershipLog(file);
             String log= " " + message.getSender_id() + "-" + message.getMembership_counter();
             fw.write(log);
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void checkMembershipLog(File file) {
+        for(int i=0;i<file.length();i++){
+        //TODO::
         }
     }
 }
