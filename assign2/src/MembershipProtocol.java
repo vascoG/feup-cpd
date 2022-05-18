@@ -32,8 +32,8 @@ public class MembershipProtocol {
                         System.out.println(message);
                         String membership = reader.readLine();
                         System.out.println(membership);
-                        String log = getMembershipLog(node_id);
-                        if(!membership.equals(log) && counter!=0){
+                        String logLocal = getMembershipLog(node_id);
+                        if(!membership.equals(logLocal) && counter!=0){
                             System.out.println("Membership logs different");
                         }
                         setMembershipLog(membership,node_id);
@@ -129,12 +129,34 @@ public class MembershipProtocol {
     }
     public void updateMembershipLog(Message message, String node_id, int node_port) {
         FileWriter fw;
+        File file = new File("./"+node_id+"/membership_log.txt");
         //32 logs
-        //procurar se o id ja existe se sim eliminar e atualizar (counter é diferente)
         try {
-            File file = new File("./"+node_id+"/membership_log.txt");
+            String fr=getMembershipLog(node_id);
+            String [] arrayLog=fr.split(" ");
+            for(int i=0;i<arrayLog.length;i++){
+                String event=arrayLog[i];
+                if(event.contains(message.getSender_id())){
+                    int counter=Integer.parseInt(event.split("-")[1]);
+                    if(counter< message.getMembership_counter()){
+                      //TODO:: TESTE
+                        String [] newArrayLog=updateArray(arrayLog,i);
+                        fw=new FileWriter(file);
+                        String logString="",newLog=message.getSender_id()+"-"+message.getMembership_counter();
+                        for(String elem:newArrayLog){
+                            logString+=elem+" ";
+                        }
+                        logString.concat(newLog);
+                        fw.write(logString);
+                        fw.close();
+                        return;
+                    }else{
+                        return;
+                    }
+                }
+            }
+
             fw = new FileWriter(file,true);
-            checkMembershipLog(file);
             String log= " " + message.getSender_id() + "-" + message.getMembership_counter();
             fw.write(log);
             fw.close();
@@ -143,11 +165,11 @@ public class MembershipProtocol {
         }
     }
 
-    private void checkMembershipLog(File file) {
-        //String fr=getMembershipLog(file);
-        for(int i=0;i<file.length();i++){
-        //TODO::
-
+    private String [] updateArray(String[] arrayLog, int index) {
+        for(int i=index;i<=arrayLog.length;i++){
+            arrayLog[i]=arrayLog[i+1];
         }
+        return arrayLog;
     }
+
 }
