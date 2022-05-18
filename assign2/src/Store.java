@@ -107,6 +107,7 @@ public class Store implements RMIServer{
 
     @Override
     public String join() throws RemoteException {
+        System.out.println("joining");
         protocol.join(this.ip_mcast_addr,this.ip_mcast_port,this.node_id,this.store_port);
         return null;
     }
@@ -128,7 +129,7 @@ public class Store implements RMIServer{
 
             RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(obj, obj.getStore_port());
             Registry registry = LocateRegistry.getRegistry();
-            registry.bind("Store", stub);
+            registry.bind(obj.getNode_id(), stub);
 
             System.err.println("Server ready");
         } catch (Exception e) {

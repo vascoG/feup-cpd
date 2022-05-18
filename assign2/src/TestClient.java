@@ -34,12 +34,13 @@ public class TestClient{
             case "join": response = stub.join(); break;
             default: response = "ERROR ON OPERATION ARGUMENT";
         }
-           
            System.out.println("response: " + response);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         
+    
 
 
     }
