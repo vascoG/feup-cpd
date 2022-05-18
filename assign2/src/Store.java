@@ -127,7 +127,7 @@ public class Store implements RMIServer{
         
         try {
 
-            RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(obj, obj.getStore_port());
+            RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(obj, 0);
             Registry registry = LocateRegistry.getRegistry();
             registry.bind(obj.getNode_id(), stub);
 

@@ -40,7 +40,7 @@ public class MembershipProtocol {
                         //TODO: Better while condition (different logs?)
                         socket.close();
                         counter++;
-                    } 
+                    }
                 serverSocket.close();
                 System.out.println("CLOSED");
                 } catch (IOException e) {
@@ -144,8 +144,10 @@ public class MembershipProtocol {
     }
 
     private void checkMembershipLog(File file) {
+        //String fr=getMembershipLog(file);
         for(int i=0;i<file.length();i++){
         //TODO::
+
         }
     }
 }
