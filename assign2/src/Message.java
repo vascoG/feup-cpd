@@ -43,13 +43,20 @@ public class Message {
 
     }
 
-    public Message(String ipAddress, int port, String log) {
+    public Message(String ipAddress, int port, String log, MessageType messageType) {
 
-        message_type = MessageType.MEMBERSHIP;
+        this.message_type = messageType;
         this.sender_id = ipAddress;
         this.sender_port = port;
         this.membership_log = log;
 
+    }
+
+    public Message(String node_id, int store_port, int i, MessageType messageType) {
+        this.message_type = messageType;
+        this.sender_id = node_id;
+        this.sender_port = store_port;
+        this.membership_counter = i;
     }
 
     private void processHeader(String header) {
@@ -66,6 +73,7 @@ public class Message {
                 this.membership_counter = Integer.parseInt(firstHeader.remove(0).trim());
                 break;
             case MEMBERSHIP:
+                this.membership_log = headerLines.remove(0).trim();
             ArrayList<String> logLine = new ArrayList<>(Arrays.asList(headerLines.remove(0).split("\\s+")));
             //TODO: Process stuff
             default:
@@ -80,6 +88,10 @@ public class Message {
         {
             case MEMBERSHIP:
                 return "MEMBERSHIP " + this.sender_id + " " + this.sender_port + " " + crlf + this.membership_log + last_crlf;
+            case JOIN: 
+                return "JOIN " + this.sender_id + " " + this.sender_port + " " + this.membership_counter + last_crlf;
+            case LEAVE:
+                return "LEAVE " + this.sender_id + " " + this.sender_port + " " + this.membership_counter + last_crlf;
             default: 
                 return "ERROR";
         }

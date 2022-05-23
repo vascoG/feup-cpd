@@ -27,7 +27,6 @@ public class MembershipProtocol {
                         System.out.println("Accepted conection");
                         InputStream input = socket.getInputStream();
                         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-        
                         String message = reader.readLine();
                         System.out.println(message);
                         String membership = reader.readLine();
@@ -36,7 +35,7 @@ public class MembershipProtocol {
                         if(!membership.equals(logLocal) && counter!=0){
                             System.out.println("Membership logs different");
                         }
-                        setMembershipLog(membership,node_id);
+                        updateMembershipLog(membership,node_id);
                         //TODO: Better while condition (different logs?)
                         socket.close();
                         counter++;
@@ -59,12 +58,24 @@ public class MembershipProtocol {
         try {
             MulticastSocket multi_cast_socket = new MulticastSocket(ip_mcast_port);
             multi_cast_socket.joinGroup(InetAddress.getByName(ip_mcast_addr));
-            //create JOIN Message, counter can be different than 0
-            String msg = "JOIN "+node_id+" "+store_port+" 0";
+
+            int counter = getMembershipCounter(node_id);
+            if(counter%2!=0)
+            {
+                System.out.println("Trying to JOIN without LEAVING");
+                multi_cast_socket.close();
+                return;
+            }
+
+            String msg = new Message(node_id, store_port, counter, MessageType.JOIN).toString();
+            
             DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName(ip_mcast_addr), ip_mcast_port);//so 2 argumentos?
             multi_cast_socket.send(datagram_packet);
+
+            multi_cast_socket.close();
+
+            setMembershipCounter(counter+1, node_id);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return;
         }
@@ -72,6 +83,9 @@ public class MembershipProtocol {
 
 
         // Atualizar chaves 
+    }
+
+    protected void updateMembershipLog(String membership, String node_id) {
     }
 
     public void sendMembershipMessage(String ipAddress, int port, String sender_id, int sender_port) 
@@ -90,10 +104,12 @@ public class MembershipProtocol {
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true);
 
-            Message message = new Message(ipAddress, port, log);
+            Message message = new Message(ipAddress, port, log, MessageType.MEMBERSHIP);
             writer.println(message.toString());
 
             System.out.println(message.toString());
+
+            socket.close();
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -127,7 +143,30 @@ public class MembershipProtocol {
             e.printStackTrace();
         }
     }
-    public void updateMembershipLog(Message message, String node_id, int node_port) {
+
+    private int getMembershipCounter(String ipAddress) {
+        try {
+            String log = Files.readString(Paths.get("./"+ipAddress+"/membership_counter.txt"));
+            return Integer.parseInt(log);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    public void setMembershipCounter(int counter,String node_id) {
+        FileWriter fw;
+        try {
+            File file = new File("./"+node_id+"/membership_counter.txt");
+            fw = new FileWriter(file);
+            fw.write(counter);
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateMembershipLogOnJoin(Message message, String node_id) {
         FileWriter fw;
         File file = new File("./"+node_id+"/membership_log.txt");
         //32 logs

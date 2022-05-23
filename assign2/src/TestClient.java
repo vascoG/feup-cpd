@@ -43,5 +43,5 @@ public class TestClient{
     
 
 
-    }
+    } //java TestClient localhost:172.0.0.1 join
 }
