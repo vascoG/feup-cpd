@@ -7,12 +7,21 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MembershipProtocol {
 
     public void join( String ip_mcast_addr, int ip_mcast_port, String node_id, int store_port)
     {
 
+        int counter = getMembershipCounter(node_id);
+        if(counter%2!=0)
+        {
+            System.out.println("Trying to JOIN without LEAVING");
+            return;
+        }
         //create serverSocket to accept MEMBERSHIP MESSAGES
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -31,10 +40,6 @@ public class MembershipProtocol {
                         System.out.println(message);
                         String membership = reader.readLine();
                         System.out.println(membership);
-                        String logLocal = getMembershipLog(node_id);
-                        if(!membership.equals(logLocal) && counter!=0){
-                            System.out.println("Membership logs different");
-                        }
                         updateMembershipLog(membership,node_id);
                         //TODO: Better while condition (different logs?)
                         socket.close();
@@ -59,13 +64,6 @@ public class MembershipProtocol {
             MulticastSocket multi_cast_socket = new MulticastSocket(ip_mcast_port);
             multi_cast_socket.joinGroup(InetAddress.getByName(ip_mcast_addr));
 
-            int counter = getMembershipCounter(node_id);
-            if(counter%2!=0)
-            {
-                System.out.println("Trying to JOIN without LEAVING");
-                multi_cast_socket.close();
-                return;
-            }
 
             String msg = new Message(node_id, store_port, counter, MessageType.JOIN).toString();
             
@@ -86,6 +84,47 @@ public class MembershipProtocol {
     }
 
     protected void updateMembershipLog(String membership, String node_id) {
+        FileWriter fw;
+        File file = new File("./"+node_id+"/membership_log.txt");
+        //32 logs
+        try {
+            String fr=getMembershipLog(node_id);
+            String [] arrayReceivedLog = membership.split(" ");
+            List<String> resultLog = new ArrayList<>();
+            String [] arrayLog=fr.split(" ");
+            resultLog.addAll(Arrays.asList(arrayLog));
+            for(int i = 0;i<arrayReceivedLog.length;i++)
+            {   
+                boolean found = false;
+                String [] log_received_line = arrayReceivedLog[i].split("-");
+                for(int j=0;j<arrayLog.length;j++)
+                {
+                    String [] log_line = arrayLog[j].split("-");
+                    if(log_received_line[0].contains(log_line[0]))
+                    {
+                        found = true;
+                        if(Integer.parseInt(log_received_line[1])<=Integer.parseInt(log_line[1]))
+                            break;
+                        else
+                        {
+                            resultLog.set(j, arrayReceivedLog[i]);
+                            break;
+                        }
+                    }   
+                }
+                if(!found)
+                resultLog.add(arrayReceivedLog[i]);   
+            }
+
+            fw = new FileWriter(file);
+            String log = String.join(" ", resultLog);
+            fw.write(log);
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     public void sendMembershipMessage(String ipAddress, int port, String sender_id, int sender_port) 
@@ -154,12 +193,12 @@ public class MembershipProtocol {
         }
     }
 
-    public void setMembershipCounter(int counter,String node_id) {
+    public void setMembershipCounter(Integer counter,String node_id) {
         FileWriter fw;
         try {
             File file = new File("./"+node_id+"/membership_counter.txt");
             fw = new FileWriter(file);
-            fw.write(counter);
+            fw.write(counter.toString());
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
