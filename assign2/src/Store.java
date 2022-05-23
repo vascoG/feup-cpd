@@ -39,7 +39,7 @@ public class Store implements RMIServer{
         membership_log = new File(parent_dir+"membership_log.txt");
         membership_counter = new File(parent_dir+"membership_counter.txt");
         writeToCounter("0");
-        writeToLog(node_id + "-0");
+        writeToLog(node_id + "-0-"+KeyHash.getSHA256(node_id));
     }
 
     public void writeToLog(String arg) {

@@ -36,9 +36,15 @@ public class MembershipProtocol {
                         System.out.println("Accepted conection");
                         InputStream input = socket.getInputStream();
                         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                        String message = reader.readLine();
-                        System.out.println(message);
-                        String membership = reader.readLine();
+                        String header = reader.readLine();
+                        System.out.println(header);
+                        StringBuilder membershipBuilder = new StringBuilder();
+                        String line;
+                         while((line=reader.readLine()) != null)
+                         {
+                             membershipBuilder.append(line).append("\n");
+                         }
+                         String membership = membershipBuilder.toString();
                         System.out.println(membership);
                         updateMembershipLog(membership,node_id);
                         //TODO: Better while condition (different logs?)
@@ -89,9 +95,9 @@ public class MembershipProtocol {
         //32 logs
         try {
             String fr=getMembershipLog(node_id);
-            String [] arrayReceivedLog = membership.split(" ");
+            String [] arrayReceivedLog = membership.split("\n");
             List<String> resultLog = new ArrayList<>();
-            String [] arrayLog=fr.split(" ");
+            String [] arrayLog=fr.split("\n");
             resultLog.addAll(Arrays.asList(arrayLog));
             for(int i = 0;i<arrayReceivedLog.length;i++)
             {   
@@ -117,7 +123,7 @@ public class MembershipProtocol {
             }
 
             fw = new FileWriter(file);
-            String log = String.join(" ", resultLog);
+            String log = String.join("\n", resultLog);
             fw.write(log);
             fw.close();
         } catch (IOException e) {
@@ -235,7 +241,7 @@ public class MembershipProtocol {
             }
 
             fw = new FileWriter(file,true);
-            String log= " " + message.getSender_id() + "-" + message.getMembership_counter();
+            String log= "\n" + message.getSender_id() + "-" + message.getMembership_counter() + "-" + KeyHash.getSHA256(message.getSender_id());
             fw.write(log);
             fw.close();
         } catch (IOException e) {
