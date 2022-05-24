@@ -32,6 +32,7 @@ public class TestClient{
             switch(operation)
         {
             case "join": response = stub.join(); break;
+            case "leave": response = stub.leave(); break;
             default: response = "ERROR ON OPERATION ARGUMENT";
         }
            System.out.println("response: " + response);

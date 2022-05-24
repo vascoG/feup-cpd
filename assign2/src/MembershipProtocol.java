@@ -13,14 +13,14 @@ import java.util.List;
 
 public class MembershipProtocol {
 
-    public void join( String ip_mcast_addr, int ip_mcast_port, String node_id, int store_port)
+    public boolean join( String ip_mcast_addr, int ip_mcast_port, String node_id, int store_port)
     {
 
-        int counter = getMembershipCounter(node_id);
-        if(counter%2!=0)
+        int membership_counter = getMembershipCounter(node_id);
+        if(membership_counter%2!=0)
         {
             System.out.println("Trying to JOIN without LEAVING");
-            return;
+            return false;
         }
         //create serverSocket to accept MEMBERSHIP MESSAGES
         Thread thread = new Thread(new Runnable() {
@@ -71,7 +71,40 @@ public class MembershipProtocol {
             multi_cast_socket.joinGroup(InetAddress.getByName(ip_mcast_addr));
 
 
-            String msg = new Message(node_id, store_port, counter, MessageType.JOIN).toString();
+            String msg = new Message(node_id, store_port, membership_counter, MessageType.JOIN).toString();
+            
+            DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName(ip_mcast_addr), ip_mcast_port);//so 2 argumentos?
+            multi_cast_socket.send(datagram_packet);
+
+            multi_cast_socket.close();
+
+            setMembershipCounter(membership_counter+1, node_id);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+
+        return true;
+        // Atualizar chaves 
+    }
+
+    public boolean leave(String ip_mcast_addr, int ip_mcast_port, String node_id, int store_port) 
+    {
+        int counter = getMembershipCounter(node_id);
+        if(counter%2==0)
+        {
+            System.out.println("Trying to LEAVE without JOINING");
+            return false;
+        } 
+
+        //SEND MULTICAST LEAVE
+        try {
+            MulticastSocket multi_cast_socket = new MulticastSocket(ip_mcast_port);
+            multi_cast_socket.joinGroup(InetAddress.getByName(ip_mcast_addr));
+
+
+            String msg = new Message(node_id, store_port, counter, MessageType.LEAVE).toString();
             
             DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName(ip_mcast_addr), ip_mcast_port);//so 2 argumentos?
             multi_cast_socket.send(datagram_packet);
@@ -81,12 +114,10 @@ public class MembershipProtocol {
             setMembershipCounter(counter+1, node_id);
         } catch (IOException e) {
             e.printStackTrace();
-            return;
+            return false;
         }
 
-
-
-        // Atualizar chaves 
+        return true;
     }
 
     protected void updateMembershipLog(String membership, String node_id) {
@@ -97,6 +128,15 @@ public class MembershipProtocol {
             String fr=getMembershipLog(node_id);
             String [] arrayReceivedLog = membership.split("\n");
             List<String> resultLog = new ArrayList<>();
+            if(fr.length()==0)
+            {
+                resultLog.addAll(Arrays.asList(arrayReceivedLog));
+                fw = new FileWriter(file);
+                String log = String.join("\n", resultLog);
+                fw.write(log);
+                fw.close();
+                return;
+            }
             String [] arrayLog=fr.split("\n");
             resultLog.addAll(Arrays.asList(arrayLog));
             for(int i = 0;i<arrayReceivedLog.length;i++)
@@ -211,26 +251,27 @@ public class MembershipProtocol {
         }
     }
 
-    public void updateMembershipLogOnJoin(Message message, String node_id) {
+    public void updateMembershipLogOnJoinLeave(Message message, String node_id) {
         FileWriter fw;
         File file = new File("./"+node_id+"/membership_log.txt");
         //32 logs
         try {
             String fr=getMembershipLog(node_id);
-            String [] arrayLog=fr.split(" ");
+            String [] arrayLog=fr.split("\n");
             for(int i=0;i<arrayLog.length;i++){
                 String event=arrayLog[i];
                 if(event.contains(message.getSender_id())){
-                    int counter=Integer.parseInt(event.split("-")[1]);
+                    String[] event_line = event.split("-");
+                    int counter=Integer.parseInt(event_line[1]);
                     if(counter< message.getMembership_counter()){
-                      //TODO:: TESTE
                         String [] newArrayLog=updateArray(arrayLog,i);
                         fw=new FileWriter(file);
-                        String logString="",newLog=message.getSender_id()+"-"+message.getMembership_counter();
+                        String logString="";
+                        String newLog=message.getSender_id()+"-"+message.getMembership_counter()+"-"+KeyHash.getSHA256(message.getSender_id());
                         for(String elem:newArrayLog){
-                            logString+=elem+" ";
+                            logString+=elem+"\n";
                         }
-                        logString.concat(newLog);
+                        logString+=newLog;
                         fw.write(logString);
                         fw.close();
                         return;
@@ -239,10 +280,17 @@ public class MembershipProtocol {
                     }
                 }
             }
-
-            fw = new FileWriter(file,true);
-            String log= "\n" + message.getSender_id() + "-" + message.getMembership_counter() + "-" + KeyHash.getSHA256(message.getSender_id());
-            fw.write(log);
+            String log;
+            if(fr.length()==0)
+                {
+                    fw = new FileWriter(file,false);
+                   log=message.getSender_id() + "-" + message.getMembership_counter() + "-" + KeyHash.getSHA256(message.getSender_id());
+                }
+            else
+                {
+                    fw = new FileWriter(file,true);
+                    log= "\n" + message.getSender_id() + "-" + message.getMembership_counter() + "-" + KeyHash.getSHA256(message.getSender_id());
+                }fw.write(log);
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -250,10 +298,15 @@ public class MembershipProtocol {
     }
 
     private String [] updateArray(String[] arrayLog, int index) {
-        for(int i=index;i<=arrayLog.length;i++){
-            arrayLog[i]=arrayLog[i+1];
+        String [] r = new String[arrayLog.length-1];
+        for(int i=0;i<index;i++)
+            r[i]=arrayLog[i];
+        for(int i=index;i<arrayLog.length-1;i++){
+            r[i]=arrayLog[i+1];
         }
-        return arrayLog;
+        return r;
     }
+
+
 
 }

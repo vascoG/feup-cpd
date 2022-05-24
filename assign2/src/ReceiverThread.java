@@ -49,8 +49,12 @@ public class ReceiverThread implements Runnable {
         //create thread for this
         if(message.getMessage_type()==MessageType.JOIN && !this.node_id.equals(message.getSender_id())){
             System.out.println("Going to send MEMBERSHIP MESSAGE TO " + message.getSender_id() + " " + message.getSender_port());
-            protocol.updateMembershipLogOnJoin(message,this.node_id);
+            protocol.updateMembershipLogOnJoinLeave(message,this.node_id);
             protocol.sendMembershipMessage(this.node_id,this.node_port,message.getSender_id(),message.getSender_port());
+        }
+        else if(message.getMessage_type()==MessageType.LEAVE && !this.node_id.equals(message.getSender_id())){
+            System.out.println("LEAVE COUNTER:" + message.getMembership_counter());
+            protocol.updateMembershipLogOnJoinLeave(message,this.node_id);
         }
 
         //TODO: Handle Message

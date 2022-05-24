@@ -39,7 +39,14 @@ public class Store implements RMIServer{
         membership_log = new File(parent_dir+"membership_log.txt");
         membership_counter = new File(parent_dir+"membership_counter.txt");
         writeToCounter("0");
-        writeToLog(node_id + "-0-"+KeyHash.getSHA256(node_id));
+        if(membership_log.exists())
+            membership_log.delete();
+        try {
+            membership_log.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //writeToLog(node_id + "-0-"+KeyHash.getSHA256(node_id));
     }
 
     public void writeToLog(String arg) {
@@ -47,7 +54,6 @@ public class Store implements RMIServer{
         try {
             //test if there are 32 events to delete the older ones
             fw = new FileWriter(membership_log);
-            fw.write(arg);
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -108,11 +114,18 @@ public class Store implements RMIServer{
     @Override
     public String join() throws RemoteException {
         System.out.println("joining");
-        protocol.join(this.ip_mcast_addr,this.ip_mcast_port,this.node_id,this.store_port);
-        return null;
+        if(protocol.join(this.ip_mcast_addr,this.ip_mcast_port,this.node_id,this.store_port))
+            return "done";
+        return "failed";
     }
 
-
+    @Override
+    public String leave() throws RemoteException {
+        System.out.println("leaving");
+        if(protocol.leave(this.ip_mcast_addr,this.ip_mcast_port,this.node_id,this.store_port))
+            return "done";
+        return "failed";
+    }
 
 
 
@@ -147,5 +160,7 @@ public class Store implements RMIServer{
 
 
     }
-    //java Store 224.0.0.0 4003 172.0.0.1 8000
+    //java Store 224.0.0.0 4003 172.0.0.1 8001
+
+   
 }
