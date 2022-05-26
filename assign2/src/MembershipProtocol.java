@@ -207,7 +207,7 @@ public class MembershipProtocol {
 
     }
 
-    private String getMembershipLog(String ipAddress) {
+    public String getMembershipLog(String ipAddress) {
         try {
             String log = Files.readString(Paths.get("./"+ipAddress+"/membership_log.txt"));
             return log;

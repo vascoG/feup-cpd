@@ -75,7 +75,6 @@ public class Message {
                 break;
             case MEMBERSHIP:
                 this.membership_log = headerLines.remove(0).trim();
-            ArrayList<String> logLine = new ArrayList<>(Arrays.asList(headerLines.remove(0).split("\\s+")));
             //TODO: Process stuff
             default:
                 break;
