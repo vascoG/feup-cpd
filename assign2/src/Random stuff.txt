@@ -29,11 +29,9 @@ O servidor tem uma pasta associada e dentro tem os ficheiros
 ------
 
 TODO: 
-Melhorar/acabar class Message
-	Quando é MEMBERSHIP, assumir que há 2 lines, uma para MEMBERSHIP IP PORT, outra para log
-Atualizar MembershipLog quando recebe um MEMBERSHIP Message
-Script para correr automaticamente
-TestClient - join
+put
+atualizar clusterMembership quando recebe join/leave/Membership
+melhorar membership multicast para enviar quem tem mais probabilidade de ter conteudo correto
 
 
 References : https://www.javatpoint.com/binary-tree-java   ,   https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/
