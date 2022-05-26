@@ -13,6 +13,8 @@ import java.util.List;
 
 public class MembershipProtocol {
 
+    private ClusterMembership clusterMembership = new ClusterMembership();
+
     public boolean join( String ip_mcast_addr, int ip_mcast_port, String node_id, int store_port)
     {
 
@@ -84,7 +86,6 @@ public class MembershipProtocol {
             return false;
         }
 
-
         return true;
         // Atualizar chaves 
     }
@@ -129,12 +130,18 @@ public class MembershipProtocol {
             String [] arrayReceivedLog = membership.split("\n");
             List<String> resultLog = new ArrayList<>();
             if(fr.length()==0)
-            {
+            {   
                 resultLog.addAll(Arrays.asList(arrayReceivedLog));
                 fw = new FileWriter(file);
                 String log = String.join("\n", resultLog);
                 fw.write(log);
                 fw.close();
+                for(int i = 0 ; i<arrayReceivedLog.length;i++)
+                {
+                    String [] log_line = arrayReceivedLog[i].split("-");
+                    clusterMembership.insert(new Member(log_line[0], Integer.parseInt(log_line[1])));         
+                }
+                clusterMembership.show();
                 return;
             }
             String [] arrayLog=fr.split("\n");
@@ -158,8 +165,12 @@ public class MembershipProtocol {
                         }
                     }   
                 }
-                if(!found)
-                resultLog.add(arrayReceivedLog[i]);   
+                if(!found){
+                    resultLog.add(arrayReceivedLog[i]);   
+                    clusterMembership.insert(new Member(log_received_line[0], Integer.parseInt(log_received_line[1])));        
+                    clusterMembership.show();
+ 
+                }
             }
 
             fw = new FileWriter(file);
@@ -267,7 +278,7 @@ public class MembershipProtocol {
                         String [] newArrayLog=updateArray(arrayLog,i);
                         fw=new FileWriter(file);
                         String logString="";
-                        String newLog=message.getSender_id()+"-"+message.getMembership_counter()+"-"+KeyHash.getSHA256(message.getSender_id());
+                        String newLog=message.getSender_id()+"-"+message.getMembership_counter();
                         for(String elem:newArrayLog){
                             logString+=elem+"\n";
                         }
@@ -281,15 +292,18 @@ public class MembershipProtocol {
                 }
             }
             String log;
+            clusterMembership.insert(new Member(message.getSender_id(), message.getMembership_counter()));
+            clusterMembership.show();
+
             if(fr.length()==0)
                 {
                     fw = new FileWriter(file,false);
-                   log=message.getSender_id() + "-" + message.getMembership_counter() + "-" + KeyHash.getSHA256(message.getSender_id());
+                   log=message.getSender_id() + "-" + message.getMembership_counter();
                 }
             else
                 {
                     fw = new FileWriter(file,true);
-                    log= "\n" + message.getSender_id() + "-" + message.getMembership_counter() + "-" + KeyHash.getSHA256(message.getSender_id());
+                    log= "\n" + message.getSender_id() + "-" + message.getMembership_counter();
                 }fw.write(log);
             fw.close();
         } catch (IOException e) {

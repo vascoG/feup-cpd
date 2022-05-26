@@ -34,3 +34,6 @@ Melhorar/acabar class Message
 Atualizar MembershipLog quando recebe um MEMBERSHIP Message
 Script para correr automaticamente
 TestClient - join
+
+
+References : https://www.javatpoint.com/binary-tree-java   ,   https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/

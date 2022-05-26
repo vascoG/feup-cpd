@@ -10,7 +10,7 @@ import java.util.TimerTask;
 public class ReceiverThread implements Runnable {
 
     private MulticastSocket multi_cast_socket;
-    private MembershipProtocol protocol = new MembershipProtocol();
+    private MembershipProtocol protocol  ;
 
 
     private boolean received_membership;
@@ -28,7 +28,7 @@ public class ReceiverThread implements Runnable {
         }
     }
 
-    public ReceiverThread(String ipAddress, int port, String node_id, int node_port) 
+    public ReceiverThread(String ipAddress, int port, String node_id, int node_port, MembershipProtocol protocol) 
     {
         try {
             this.multi_cast_socket = new MulticastSocket(port);
@@ -36,6 +36,7 @@ public class ReceiverThread implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.protocol = protocol;
         this.ipAddress=ipAddress;
         this.port=port;
         this.node_id = node_id;
@@ -66,7 +67,7 @@ public class ReceiverThread implements Runnable {
                             DatagramPacket datagram_packet = new DatagramPacket(message.getBytes(), message.length(),InetAddress.getByName(ipAddress), port);
 
                             System.out.println("SENT MULTICAST MESSAGE");
-                            
+
                             multi_cast_socket.send(datagram_packet);
                         }
                     } catch (Exception e) {
@@ -107,7 +108,7 @@ public class ReceiverThread implements Runnable {
         else if(message.getMessage_type()==MessageType.MEMBERSHIP){
             this.received_membership=true;
             timer=new Timer();
-            timer.schedule(new MembershipMessageTask(), 5*1000);
+            timer.schedule(new MembershipMessageTask(), 1000*1000);
         }
 
         }
