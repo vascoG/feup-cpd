@@ -108,7 +108,7 @@ public class ReceiverThread implements Runnable {
         else if(message.getMessage_type()==MessageType.MEMBERSHIP){
             this.received_membership=true;
             timer=new Timer();
-            timer.schedule(new MembershipMessageTask(), 1000*1000);
+            timer.schedule(new MembershipMessageTask(), 5*1000);
         }
 
         }

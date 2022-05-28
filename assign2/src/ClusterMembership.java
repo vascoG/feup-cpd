@@ -171,5 +171,25 @@ public class ClusterMembership {
             inorder(root.right);
         }
     }
+
+    private Node findSucessor(String value){
+        Node node = inOrderSearch(root, value);
+        if(node==null)
+            node=root;
+        return node;  
+    }
+
+    private Node inOrderSearch(Node node, String value){
+        if(node == null)
+            return null;
+        Node left = inOrderSearch(node.left,value);
+        if(left!=null)
+            return left;
+        if(node.data.hashKey.compareTo(value)>0)
+            return node;
+        else
+            return inOrderSearch(node.right, value);
+    }   
+
 }
 
