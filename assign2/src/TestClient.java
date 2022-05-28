@@ -22,8 +22,8 @@ public class TestClient{
             else
                 opnd = args[2];
         }
-        String[] node_ap_array = node_ap.split(":");
-
+        String value = Files.readString(Paths.get(opnd));
+        String key=KeyHash.getSHA256(value);
       
         try {
             Registry registry = LocateRegistry.getRegistry(node_ap_array[0]);
@@ -34,6 +34,7 @@ public class TestClient{
             case "join": response = stub.join(); break;
             case "leave": response = stub.leave(); break;
             case "show": response = stub.show();break;
+            case "put": response = stub.put(key,value);break;
             default: response = "ERROR ON OPERATION ARGUMENT";
         }
            System.out.println("response: " + response);

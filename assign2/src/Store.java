@@ -108,7 +108,15 @@ public class Store implements RMIServer{
     @Override
     public String put(String key, String value) throws RemoteException {
         // TODO Auto-generated method stub
-        return null;
+        try{
+             File fw = new FileWriter("./"+node_id+"/"+key);
+            fw.write(value);
+            fw.close();
+            return "done";
+        }catch(IOException e){
+            e.printStackTrace();
+            return "failed";
+        }
     }
 
     @Override
