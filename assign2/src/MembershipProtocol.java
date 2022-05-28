@@ -13,7 +13,7 @@ import java.util.List;
 
 public class MembershipProtocol {
 
-    private ClusterMembership clusterMembership = new ClusterMembership();
+    public ClusterMembership clusterMembership = new ClusterMembership();
 
     public boolean join( String ip_mcast_addr, int ip_mcast_port, String node_id, int store_port)
     {
@@ -141,7 +141,6 @@ public class MembershipProtocol {
                     String [] log_line = arrayReceivedLog[i].split("-");
                     clusterMembership.insert(new Member(log_line[0], Integer.parseInt(log_line[1])));         
                 }
-                clusterMembership.show();
                 return;
             }
             String [] arrayLog=fr.split("\n");
@@ -150,13 +149,17 @@ public class MembershipProtocol {
             {   
                 boolean found = false;
                 String [] log_received_line = arrayReceivedLog[i].split("-");
+                int received_counter = Integer.parseInt(log_received_line[1]);
+                String received_log = log_received_line[0];
+                clusterMembership.insert(new Member(received_log,received_counter));        
                 for(int j=0;j<arrayLog.length;j++)
                 {
                     String [] log_line = arrayLog[j].split("-");
-                    if(log_received_line[0].contains(log_line[0]))
+                    if(received_log.contains(log_line[0]))
                     {
                         found = true;
-                        if(Integer.parseInt(log_received_line[1])<=Integer.parseInt(log_line[1]))
+                        
+                        if(received_counter<=Integer.parseInt(log_line[1]))
                             break;
                         else
                         {
@@ -167,9 +170,6 @@ public class MembershipProtocol {
                 }
                 if(!found){
                     resultLog.add(arrayReceivedLog[i]);   
-                    clusterMembership.insert(new Member(log_received_line[0], Integer.parseInt(log_received_line[1])));        
-                    clusterMembership.show();
- 
                 }
             }
 
@@ -293,8 +293,6 @@ public class MembershipProtocol {
             }
             String log;
             clusterMembership.insert(new Member(message.getSender_id(), message.getMembership_counter()));
-            clusterMembership.show();
-
             if(fr.length()==0)
                 {
                     fw = new FileWriter(file,false);

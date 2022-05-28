@@ -33,6 +33,7 @@ public class ClusterMembership {
             insertRec(root, value);
     } 
     
+    
     private void insertRec(Node node, Member value) {
 
         int compare = value.hashKey.compareTo(node.data.hashKey);
@@ -55,6 +56,11 @@ public class ClusterMembership {
             {  
                 node.right = new Node(value);  
             }  
+        }
+        else
+        {
+            if(value.counter>node.data.counter)
+                node.data.counter=value.counter;
         }  
     }
 
@@ -130,6 +136,26 @@ public class ClusterMembership {
         return root;
     }
     }
+
+    public void setCounter(Member searchedValue, int counter)  
+  {  
+    Node current = root;  
+    while(!current.data.ipAddress.equals(searchedValue.ipAddress))  
+    {  
+        int compare = searchedValue.hashKey.compareTo(current.data.hashKey);
+      if(compare < 0)  
+        // Move to the left if searched value is less  
+        current = current.left;  
+      else  
+        // Move to the right if searched value is >=  
+        current = current.right;  
+      if(current == null)  
+      {  
+        return;  
+      }  
+    }  
+    current.data.counter=counter;  
+  }  
 
     public void show()
     {

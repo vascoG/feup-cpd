@@ -33,6 +33,7 @@ public class TestClient{
         {
             case "join": response = stub.join(); break;
             case "leave": response = stub.leave(); break;
+            case "show": response = stub.show();break;
             default: response = "ERROR ON OPERATION ARGUMENT";
         }
            System.out.println("response: " + response);

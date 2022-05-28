@@ -162,5 +162,11 @@ public class Store implements RMIServer{
     }
     //java Store 224.0.0.0 4003 172.0.0.1 8001
 
+    @Override
+    public String show() throws RemoteException {
+        protocol.clusterMembership.show();
+        return "shown";
+    }
+
    
 }
