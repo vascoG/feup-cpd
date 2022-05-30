@@ -60,7 +60,7 @@ public class Message {
     }
 
     private void processHeader(String header) {
-        ArrayList<String> headerLines = new ArrayList<>(Arrays.asList(header.split("\r\n")));
+        ArrayList<String> headerLines = new ArrayList<>(Arrays.asList(header.split(crlf)));
 
         ArrayList<String> firstHeader = new ArrayList<>(Arrays.asList(headerLines.remove(0).split("\\s+")));
 
@@ -70,11 +70,11 @@ public class Message {
 
         switch (this.message_type) {
             case JOIN:
+            case LEAVE:
                 this.membership_counter = Integer.parseInt(firstHeader.remove(0).trim());
                 break;
             case MEMBERSHIP:
                 this.membership_log = headerLines.remove(0).trim();
-            ArrayList<String> logLine = new ArrayList<>(Arrays.asList(headerLines.remove(0).split("\\s+")));
             //TODO: Process stuff
             default:
                 break;
