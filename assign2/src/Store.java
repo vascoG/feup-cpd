@@ -121,10 +121,6 @@ public class Store implements RMIServer{
             FileWriter fw =new FileWriter(keyFile);
             fw.write(value);
             fw.close();
-            System.out.println("./"+node_id+"/"+key+".txt");
-            System.out.println(value+" vale");
-            System.out.println(node_id+" node");
-
             return "done";
         }catch(IOException e){
             e.printStackTrace();
