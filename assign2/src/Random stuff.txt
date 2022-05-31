@@ -37,9 +37,9 @@ bf17252ece830bec20d39951393ee7e6f2097ceb12e411dbd1a1a60921bdf844 - 172.0.0.1 - 0
 
 
 TODO: 
-PUT
-Message - PUT / MEMBERSHIP
-MEMBERSHIP - Sleep dinamico para aumentar probabilidade
+DELETE
+Message - DELETE / MEMBERSHIP
+MEMBERSHIP - Sleep dinamico para aumentar probabilidade(nao testado)
 Atualizar chaves após JOIN/LEAVE
 LEAVE caso conexao de PUT/GET/DELETE falhe
 
