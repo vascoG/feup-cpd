@@ -4,4 +4,5 @@ public enum MessageType {
     LEAVE,
     MEMBERSHIP,
     PUT,
+    DELETE,
 }

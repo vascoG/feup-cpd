@@ -117,7 +117,7 @@ public class Store implements RMIServer{
                 FileWriter fw =new FileWriter(keyFile);
                 fw.write(value);
                 fw.close();
-                return "done";
+                return "done: "+key;
             }catch(IOException e){
                 e.printStackTrace();
                 return "failed";
@@ -134,7 +134,7 @@ public class Store implements RMIServer{
                 writer.println(message.toString());
 
                 socket.close();
-                return "done";
+                return "done: "+key;
             }catch (UnknownHostException e) {
                 e.printStackTrace();
                 return "failed";
@@ -162,6 +162,39 @@ public class Store implements RMIServer{
         return "failed";
     }
 
+    @Override
+    public String delete(String key) throws RemoteException {
+        System.out.println("deleting");
+        Member node=protocol.clusterMembership.findSucessor(key);
+        if(node.ipAddress.equals(this.node_id)){
+            File keyFile= new File("./"+node_id+"/"+key+".txt");
+            if(keyFile.exists())
+               return keyFile.delete()?"done": "failed";
+            else
+                return "failed: this file does not exist";
+        }else{
+            try {
+                Socket socket = new Socket("localhost", node.port);
+                System.out.println("GOING TO SEND DELETE");
+
+                OutputStream output = socket.getOutputStream();
+                PrintWriter writer = new PrintWriter(output, true);
+
+                Message message = new Message(this.node_id, this.store_port, key,MessageType.DELETE);
+                writer.println(message.toString());
+
+                socket.close();
+                return "done";
+            }catch (UnknownHostException e) {
+                e.printStackTrace();
+                return "failed";
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "failed";
+            }
+
+        }
+    }
 
 
     public static void main(String args[]) {

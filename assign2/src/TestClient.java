@@ -42,6 +42,8 @@ public class TestClient{
                 String value = Files.readString(Paths.get(opnd));
                 String key=KeyHash.getSHA256(value);
                 response = stub.put(key,value);break;
+            case "delete":
+                response=stub.delete(opnd); break;
             default: response = "ERROR ON OPERATION ARGUMENT";
         }
            System.out.println("response: " + response);

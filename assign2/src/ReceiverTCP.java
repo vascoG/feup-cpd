@@ -35,12 +35,22 @@ public class ReceiverTCP implements Runnable {
                             value.append(line).append("\n");
                         }
                         put(node_id, key, value.toString());
+                        break;
+                    case "DELETE":
+                        delete(node_id,arrayHeader[3]);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    private void delete(String node_id, String key) {
+        File keyFile= new File("./"+node_id+"/"+key+".txt");
+        if(keyFile.exists())
+            keyFile.delete();
+    }
+
 
     private void put(String node_id, String key, String value) {
         try {

@@ -6,4 +6,6 @@ public interface RMIServer extends Remote {
     String join() throws RemoteException;
     String leave() throws RemoteException;
     String show() throws RemoteException;
+
+    String delete(String opnd) throws RemoteException;
 }

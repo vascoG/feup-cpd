@@ -53,13 +53,17 @@ public class Message {
 
     }
 
-    public Message(String ipAddress, int port, String log, MessageType messageType) {
-
+    public Message(String ipAddress, int port, String string, MessageType messageType) {
+        switch (messageType){
+            case DELETE:
+                this.key = string; break;
+            case MEMBERSHIP:
+                this.membership_log=string; break;
+            default:break;
+        }
         this.message_type = messageType;
         this.sender_id = ipAddress;
         this.sender_port = port;
-        this.membership_log = log;
-
     }
 
     public Message(String node_id, int store_port, int i, MessageType messageType) {
@@ -123,6 +127,8 @@ public class Message {
                 return "LEAVE " + this.sender_id + " " + this.sender_port + " " + this.membership_counter + last_crlf;
             case PUT: 
                 return "PUT " + this.sender_id + " "+ this.sender_port + " " + this.key + crlf + this.value + last_crlf;
+            case DELETE:
+                return "DELETE " + this.sender_id + " "+ this.sender_port + " " + this.key + last_crlf;
             default: 
                 return "ERROR";
         }

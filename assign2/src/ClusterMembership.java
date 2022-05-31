@@ -175,8 +175,17 @@ public class ClusterMembership {
     public Member findSucessor(String value){
         Node node = inOrderSearch(root, value);
         if(node==null)
-            node=root;
+            node=findMinimumPresent(root);
         return node.data;
+    }
+
+    private Node findMinimumPresent(Node node) {
+        Node current = node;
+
+        while (current.left != null) {
+            current = current.left;
+        }
+        return current;
     }
 
     private Node inOrderSearch(Node node, String value){
@@ -184,7 +193,6 @@ public class ClusterMembership {
             return null;
         Node left = inOrderSearch(node.left,value);
         if(left!=null){
-            if(left.data.isInsideCluster())
                 return left;
         }
 
