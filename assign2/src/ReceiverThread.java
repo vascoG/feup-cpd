@@ -57,12 +57,17 @@ public class ReceiverThread implements Runnable {
                    while(true)
                    {
                        try {
-                        Thread.sleep((new Random().nextInt(11)+1)*10);
+                        String log = protocol.getMembershipLog(node_id);
+                        int random = (new Random().nextInt(11)+1)*10;
+        
+                        if(log.isEmpty())
+                            random+=500;
+                        else
+                            random+=500/log.length();
+
+                        Thread.sleep(random);
                         if(!received_membership)
                         {
-                            String log = protocol.getMembershipLog(node_id);
-                            if(log.isEmpty())
-                                continue;
                             String message = new Message(ipAddress, port, log, MessageType.MEMBERSHIP).toString();
                             DatagramPacket datagram_packet = new DatagramPacket(message.getBytes(), message.length(),InetAddress.getByName(ipAddress), port);
 

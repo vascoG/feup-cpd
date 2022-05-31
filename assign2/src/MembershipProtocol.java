@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class MembershipProtocol {
 
@@ -197,11 +198,20 @@ public class MembershipProtocol {
     public void sendMembershipMessage(String ipAddress, int port, String sender_id, int sender_port) 
     {
         //wait random time
+        int random = (new Random().nextInt(11)+1)*10;
         
-
-        //get log and table (maybe 2 threads)
         String log = getMembershipLog(ipAddress);
+        if(log.isEmpty())
+            random+=500;
+        else
+            random+=500/log.length();
 
+        try {
+            Thread.sleep(random);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+        
         try {
             System.out.println("TRYING TO CONNECT TO SOCKET " + sender_port);
             Socket socket = new Socket("localhost", sender_port);
