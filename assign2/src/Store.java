@@ -1,9 +1,14 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -173,7 +178,29 @@ public class Store implements RMIServer{
         new Thread(receiver_thread).start();
 
 
-        
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    ServerSocket serverSocket = new ServerSocket(obj.getStore_port());
+                    System.out.println("LISTENING TO PORT (KeyStore Operations)" + obj.getStore_port());
+                    while(true){
+                    Socket socket = serverSocket.accept();
+                    System.out.println("Accepted conection");
+                    InputStream input = socket.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    String header = reader.readLine();
+                    System.out.println(header);
+                    String [] arrayHeader = header.split(" ");
+                    String operation = arrayHeader[0];
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }                
+            }
+            
+        }).start();
 
 
     }

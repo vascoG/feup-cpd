@@ -29,9 +29,11 @@ O servidor tem uma pasta associada e dentro tem os ficheiros
 ------
 
 TODO: 
-put
-atualizar clusterMembership quando recebe join/leave/Membership
-melhorar membership multicast para enviar quem tem mais probabilidade de ter conteudo correto
+PUT
+Message - PUT / MEMBERSHIP
+MEMBERSHIP - Sleep dinamico para aumentar probabilidade
+Atualizar chaves após JOIN/LEAVE
+LEAVE caso conexao de PUT/GET/DELETE falhe
 
 
 References : https://www.javatpoint.com/binary-tree-java   ,   https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/

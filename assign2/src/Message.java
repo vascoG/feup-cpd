@@ -13,6 +13,8 @@ public class Message {
     private String sender_id;
     private int sender_port;
 
+    private int join_port;
+
     private int membership_counter;
 
     private String membership_log;
@@ -27,6 +29,10 @@ public class Message {
 
     public int getSender_port() {
         return sender_port;
+    }
+
+    public int getjoin_port() {
+        return join_port;
     }
 
     public int getMembership_counter() {
@@ -59,6 +65,14 @@ public class Message {
         this.membership_counter = i;
     }
 
+    public Message(String node_id, int store_port, int membership_counter, MessageType join, int join_port) {
+        this.message_type = join;
+        this.sender_id = node_id;
+        this.sender_port = store_port;
+        this.membership_counter = membership_counter;
+        this.join_port = join_port;
+    }
+
     private void processHeader(String header) {
         ArrayList<String> headerLines = new ArrayList<>(Arrays.asList(header.split(crlf)));
 
@@ -70,6 +84,9 @@ public class Message {
 
         switch (this.message_type) {
             case JOIN:
+                this.membership_counter = Integer.parseInt(firstHeader.remove(0).trim());
+                this.join_port = Integer.parseInt(firstHeader.remove(0).trim());
+                break;
             case LEAVE:
                 this.membership_counter = Integer.parseInt(firstHeader.remove(0).trim());
                 break;
@@ -89,7 +106,7 @@ public class Message {
             case MEMBERSHIP:
                 return "MEMBERSHIP " + this.sender_id + " " + this.sender_port + " " + crlf + this.membership_log + last_crlf;
             case JOIN: 
-                return "JOIN " + this.sender_id + " " + this.sender_port + " " + this.membership_counter + last_crlf;
+                return "JOIN " + this.sender_id + " " + this.sender_port + " " + this.membership_counter + " " + this.join_port + last_crlf;
             case LEAVE:
                 return "LEAVE " + this.sender_id + " " + this.sender_port + " " + this.membership_counter + last_crlf;
             default: 

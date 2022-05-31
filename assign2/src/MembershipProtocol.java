@@ -19,6 +19,7 @@ public class MembershipProtocol {
     {
 
         int membership_counter = getMembershipCounter(node_id);
+
         if(membership_counter%2!=0)
         {
             System.out.println("Trying to JOIN without LEAVING");
@@ -29,13 +30,39 @@ public class MembershipProtocol {
             @Override
             public void run() {
                 ServerSocket serverSocket;
+                int join_port;
                 try {
-                    serverSocket = new ServerSocket(store_port);
-                    System.out.println("LISTENING TO PORT " + store_port);
+                    serverSocket = new ServerSocket(0);
+                    join_port = serverSocket.getLocalPort();
+                    System.out.println("LISTENING TO PORT " + join_port);
+
+                    new Thread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            //SEND MULTICAST JOIN
+                            try {
+                                MulticastSocket multi_cast_socket = new MulticastSocket(ip_mcast_port);
+                                multi_cast_socket.joinGroup(InetAddress.getByName(ip_mcast_addr));
+
+                                String msg = new Message(node_id, store_port, membership_counter, MessageType.JOIN,join_port).toString();
+            
+                                DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName(ip_mcast_addr), ip_mcast_port);//so 2 argumentos?
+                                multi_cast_socket.send(datagram_packet);
+
+                                multi_cast_socket.close();
+
+                                setMembershipCounter(membership_counter+1, node_id);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                    }).start();
+
                     int counter =0;
                     while(counter < 3){
                         Socket socket = serverSocket.accept();
-                        System.out.println("Accepted conection");
+                        System.out.println("Accepted Membership connection");
                         InputStream input = socket.getInputStream();
                         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                         String header = reader.readLine();
@@ -67,24 +94,7 @@ public class MembershipProtocol {
         thread.start();
 
 
-        //SEND MULTICAST JOIN
-        try {
-            MulticastSocket multi_cast_socket = new MulticastSocket(ip_mcast_port);
-            multi_cast_socket.joinGroup(InetAddress.getByName(ip_mcast_addr));
-
-
-            String msg = new Message(node_id, store_port, membership_counter, MessageType.JOIN).toString();
-            
-            DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName(ip_mcast_addr), ip_mcast_port);//so 2 argumentos?
-            multi_cast_socket.send(datagram_packet);
-
-            multi_cast_socket.close();
-
-            setMembershipCounter(membership_counter+1, node_id);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+       
 
         return true;
         // Atualizar chaves 
@@ -202,8 +212,6 @@ public class MembershipProtocol {
 
             Message message = new Message(ipAddress, port, log, MessageType.MEMBERSHIP);
             writer.println(message.toString());
-
-            System.out.println(message.toString());
 
             socket.close();
 
