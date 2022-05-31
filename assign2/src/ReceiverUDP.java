@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ReceiverThread implements Runnable {
+public class ReceiverUDP implements Runnable {
 
     private MulticastSocket multi_cast_socket;
     private MembershipProtocol protocol  ;
@@ -28,7 +28,7 @@ public class ReceiverThread implements Runnable {
         }
     }
 
-    public ReceiverThread(String ipAddress, int port, String node_id, int node_port, MembershipProtocol protocol) 
+    public ReceiverUDP(String ipAddress, int port, String node_id, int node_port, MembershipProtocol protocol)
     {
         try {
             this.multi_cast_socket = new MulticastSocket(port);
@@ -57,17 +57,12 @@ public class ReceiverThread implements Runnable {
                    while(true)
                    {
                        try {
-                        String log = protocol.getMembershipLog(node_id);
-                        int random = (new Random().nextInt(11)+1)*10;
-        
-                        if(log.isEmpty())
-                            random+=500;
-                        else
-                            random+=500/log.length();
-
-                        Thread.sleep(random);
+                        Thread.sleep((new Random().nextInt(11)+1)*10);
                         if(!received_membership)
                         {
+                            String log = protocol.getMembershipLog(node_id);
+                            if(log.isEmpty())
+                                continue;
                             String message = new Message(ipAddress, port, log, MessageType.MEMBERSHIP).toString();
                             DatagramPacket datagram_packet = new DatagramPacket(message.getBytes(), message.length(),InetAddress.getByName(ipAddress), port);
 

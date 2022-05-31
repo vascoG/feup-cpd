@@ -1,6 +1,5 @@
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -66,7 +65,7 @@ public class Store implements RMIServer{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
     }
 
     public String getIp_mcast_addr() {
@@ -173,7 +172,7 @@ public class Store implements RMIServer{
             return;
         }
         Store obj = new Store(args[0],args[1],args[2],args[3]);
-        
+
         try {
 
             RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(obj, 0);
@@ -188,8 +187,8 @@ public class Store implements RMIServer{
 
 
         //criar threads de escuta para multicast(so dar start apos o join)
-        ReceiverThread receiver_thread = new ReceiverThread(obj.getIp_mcast_addr(), obj.getIp_mcast_port(), obj.getNode_id(), obj.getStore_port(),obj.protocol);
-        new Thread(receiver_thread).start();
+        ReceiverUDP receiverUDP = new ReceiverUDP(obj.getIp_mcast_addr(), obj.getIp_mcast_port(), obj.getNode_id(), obj.getStore_port(),obj.protocol);
+        new Thread(receiverUDP).start();
 
         ReceiverTCP receiverTCP = new ReceiverTCP(obj.getStore_port(),obj.getNode_id());
         new Thread(receiverTCP).start();
