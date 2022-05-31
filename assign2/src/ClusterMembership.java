@@ -172,20 +172,23 @@ public class ClusterMembership {
         }
     }
 
-    private Node findSucessor(String value){
+    public Member findSucessor(String value){
         Node node = inOrderSearch(root, value);
         if(node==null)
             node=root;
-        return node;  
+        return node.data;
     }
 
     private Node inOrderSearch(Node node, String value){
         if(node == null)
             return null;
         Node left = inOrderSearch(node.left,value);
-        if(left!=null)
-            return left;
-        if(node.data.hashKey.compareTo(value)>0)
+        if(left!=null){
+            if(left.data.isInsideCluster())
+                return left;
+        }
+
+        if(node.data.hashKey.compareTo(value)>0 && node.data.isInsideCluster())
             return node;
         else
             return inOrderSearch(node.right, value);

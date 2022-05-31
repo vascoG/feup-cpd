@@ -150,7 +150,7 @@ public class MembershipProtocol {
                 for(int i = 0 ; i<arrayReceivedLog.length;i++)
                 {
                     String [] log_line = arrayReceivedLog[i].split("-");
-                    clusterMembership.insert(new Member(log_line[0], Integer.parseInt(log_line[1])));         
+                    clusterMembership.insert(new Member(log_line[0], Integer.parseInt(log_line[1]),Integer.parseInt(log_line[2])));
                 }
                 return;
             }
@@ -162,7 +162,7 @@ public class MembershipProtocol {
                 String [] log_received_line = arrayReceivedLog[i].split("-");
                 int received_counter = Integer.parseInt(log_received_line[1]);
                 String received_log = log_received_line[0];
-                clusterMembership.insert(new Member(received_log,received_counter));        
+                clusterMembership.insert(new Member(received_log,received_counter,Integer.parseInt(log_received_line[2])));
                 for(int j=0;j<arrayLog.length;j++)
                 {
                     String [] log_line = arrayLog[j].split("-");
@@ -296,7 +296,8 @@ public class MembershipProtocol {
                         String [] newArrayLog=updateArray(arrayLog,i);
                         fw=new FileWriter(file);
                         String logString="";
-                        String newLog=message.getSender_id()+"-"+message.getMembership_counter();
+                        clusterMembership.insert(new Member(message.getSender_id(), message.getMembership_counter(),message.getSender_port()));
+                        String newLog=message.getSender_id()+"-"+message.getMembership_counter()+"-"+message.getSender_port();
                         for(String elem:newArrayLog){
                             logString+=elem+"\n";
                         }
@@ -310,16 +311,16 @@ public class MembershipProtocol {
                 }
             }
             String log;
-            clusterMembership.insert(new Member(message.getSender_id(), message.getMembership_counter()));
+            clusterMembership.insert(new Member(message.getSender_id(), message.getMembership_counter(),message.getSender_port()));
             if(fr.length()==0)
                 {
                     fw = new FileWriter(file,false);
-                   log=message.getSender_id() + "-" + message.getMembership_counter();
+                   log=message.getSender_id() + "-" + message.getMembership_counter()+"-"+message.getSender_port();
                 }
             else
                 {
                     fw = new FileWriter(file,true);
-                    log= "\n" + message.getSender_id() + "-" + message.getMembership_counter();
+                    log= "\n" + message.getSender_id() + "-" + message.getMembership_counter()+"-"+message.getSender_port();
                 }fw.write(log);
             fw.close();
         } catch (IOException e) {
