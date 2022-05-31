@@ -1,14 +1,5 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -112,24 +103,47 @@ public class Store implements RMIServer{
 
     @Override
     public String put(String key, String value) throws RemoteException {
-        // TODO Auto-generated method stub
 
-        try{
-            File keyFile= new File("./"+node_id+"/"+key+".txt");
-            if(keyFile.exists())
-               keyFile.delete();
+        Member node=protocol.clusterMembership.findSucessor(key);
+        if(node.ipAddress.equals(this.node_id)){
+            try{
+                File keyFile= new File("./"+node_id+"/"+key+".txt");
+                if(keyFile.exists())
+                    keyFile.delete();
+                try {
+                    keyFile.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                FileWriter fw =new FileWriter(keyFile);
+                fw.write(value);
+                fw.close();
+                return "done";
+            }catch(IOException e){
+                e.printStackTrace();
+                return "failed";
+            }
+        }else{
             try {
-                keyFile.createNewFile();
+                Socket socket = new Socket("localhost", node.port);
+                System.out.println("GOING TO SEND PUT");
+
+                OutputStream output = socket.getOutputStream();
+                PrintWriter writer = new PrintWriter(output, true);
+
+                Message message = new Message(this.node_id, this.store_port, key,value,MessageType.PUT);
+                writer.println(message.toString());
+
+                socket.close();
+                return "done";
+            }catch (UnknownHostException e) {
+                e.printStackTrace();
+                return "failed";
             } catch (IOException e) {
                 e.printStackTrace();
+                return "failed";
             }
-            FileWriter fw =new FileWriter(keyFile);
-            fw.write(value);
-            fw.close();
-            return "done";
-        }catch(IOException e){
-            e.printStackTrace();
-            return "failed";
+
         }
     }
 
@@ -177,31 +191,8 @@ public class Store implements RMIServer{
         ReceiverThread receiver_thread = new ReceiverThread(obj.getIp_mcast_addr(), obj.getIp_mcast_port(), obj.getNode_id(), obj.getStore_port(),obj.protocol);
         new Thread(receiver_thread).start();
 
-
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    ServerSocket serverSocket = new ServerSocket(obj.getStore_port());
-                    System.out.println("LISTENING TO PORT (KeyStore Operations)" + obj.getStore_port());
-                    while(true){
-                    Socket socket = serverSocket.accept();
-                    System.out.println("Accepted conection");
-                    InputStream input = socket.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    String header = reader.readLine();
-                    System.out.println(header);
-                    String [] arrayHeader = header.split(" ");
-                    String operation = arrayHeader[0];
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }                
-            }
-            
-        }).start();
-
+        ReceiverTCP receiverTCP = new ReceiverTCP(obj.getStore_port(),obj.getNode_id());
+        new Thread(receiverTCP).start();
 
     }
     //java Store 224.0.0.0 4003 172.0.0.1 8001

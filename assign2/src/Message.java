@@ -19,6 +19,10 @@ public class Message {
 
     private String membership_log;
 
+    private String value;
+
+    private String key;
+
     public MessageType getMessage_type() {
         return message_type;
     }
@@ -73,6 +77,14 @@ public class Message {
         this.join_port = join_port;
     }
 
+    public Message(String node_id, int store_port, String key, String value, MessageType put) {
+        this.message_type = put;
+        this.sender_id = node_id;
+        this.sender_port = store_port;
+        this.key = key;
+        this.value=value;
+    }
+
     private void processHeader(String header) {
         ArrayList<String> headerLines = new ArrayList<>(Arrays.asList(header.split(crlf)));
 
@@ -109,6 +121,8 @@ public class Message {
                 return "JOIN " + this.sender_id + " " + this.sender_port + " " + this.membership_counter + " " + this.join_port + last_crlf;
             case LEAVE:
                 return "LEAVE " + this.sender_id + " " + this.sender_port + " " + this.membership_counter + last_crlf;
+            case PUT: 
+                return "PUT " + this.sender_id + " "+ this.sender_port + " " + this.key + crlf + this.value + last_crlf;
             default: 
                 return "ERROR";
         }
