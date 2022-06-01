@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class ClusterMembership {
@@ -183,13 +185,19 @@ public class ClusterMembership {
     }
 
     private Node findMinimumPresent(Node node) {
-        Node current = node;
-
-        while (current.left != null) {
-            current = current.left;
-        }
-        return current;
+        List<Node> list = new ArrayList<Node>();
+        inOrder(node, list);
+        return list.get(0);
     }
+	
+	public void inOrder(Node node, List<Node> list){
+		if(node != null){
+			inOrder(node.left, list);
+            if(node.data.isInsideCluster())
+			    list.add(node);
+			inOrder(node.right, list);	
+		}
+	}
 
     private Node inOrderSearch(Node node, String value){
         if(node == null)
