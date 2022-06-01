@@ -4,6 +4,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Store implements RMIServer{
 
@@ -143,6 +145,29 @@ public class Store implements RMIServer{
                 return "failed";
             }
 
+        }
+    }
+
+    @Override
+    public String get(String key) throws RemoteException {
+
+        Member node=protocol.clusterMembership.findSucessor(key);
+        if(node.ipAddress.equals(this.node_id)){
+            try{
+                File keyFile= new File("./"+node_id+"/"+key+".txt");
+                if(keyFile.exists()){
+                    String log = Files.readString(Paths.get("./"+node_id+"/"+key+".txt"));
+                    return "done: " +log;
+                }
+                else{
+                    return "failed";
+                }
+            }catch(IOException e){
+                e.printStackTrace();
+                return "failed";
+            }
+        }else{
+            return "contact this node: " +node.ipAddress;
         }
     }
 
