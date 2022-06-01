@@ -59,6 +59,8 @@ public class Message {
                 this.key = string; break;
             case MEMBERSHIP:
                 this.membership_log=string; break;
+            case GET:
+                this.key = string; break;
             default:break;
         }
         this.message_type = messageType;
@@ -129,6 +131,8 @@ public class Message {
                 return "PUT " + this.sender_id + " "+ this.sender_port + " " + this.key + crlf + this.value + last_crlf;
             case DELETE:
                 return "DELETE " + this.sender_id + " "+ this.sender_port + " " + this.key + last_crlf;
+            case GET:
+                return "GET " + this.sender_id + " "+ this.sender_port + " " + this.key + last_crlf;
             default: 
                 return "ERROR";
         }

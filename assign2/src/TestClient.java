@@ -44,6 +44,8 @@ public class TestClient{
                 response = stub.put(key,value);break;
             case "delete":
                 response=stub.delete(opnd); break;
+            case "get":
+                response=stub.get(opnd); break;
             default: response = "ERROR ON OPERATION ARGUMENT";
         }
            System.out.println("response: " + response);
