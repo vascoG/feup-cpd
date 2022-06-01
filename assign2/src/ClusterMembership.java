@@ -157,19 +157,22 @@ public class ClusterMembership {
     current.data.counter=counter;  
   }  
 
-    public void show()
+    public String show()
     {
-        System.out.println("SHOW: \n");
-        inorder(root);
+       return inorder(root,"\n");
     }
-    private void inorder(Node root)
+    private String inorder(Node root, String string)
     {
         if (root != null)
         {
-            inorder(root.left);
-            System.out.print(root.data.hashKey + " - " + root.data.ipAddress+ " - " + root.data.counter + "\n");
-            inorder(root.right);
+            string = inorder(root.left,string);
+            string = string + root.data.hashKey + " - " + root.data.ipAddress+ " - " + root.data.counter + "\n";
+            string = inorder(root.right,string);
+            
+            return string;
         }
+        else
+            return string;
     }
 
     public Member findSucessor(String value){

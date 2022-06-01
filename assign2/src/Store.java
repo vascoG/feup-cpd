@@ -231,8 +231,7 @@ public class Store implements RMIServer{
 
     @Override
     public String show() throws RemoteException {
-        protocol.clusterMembership.show();
-        return "shown";
+        return protocol.clusterMembership.show();
     }
 
    
