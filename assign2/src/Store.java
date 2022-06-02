@@ -108,6 +108,9 @@ public class Store implements RMIServer{
         Member node=protocol.clusterMembership.findSucessor(key);
         if(node.ipAddress.equals(this.node_id)){
             try{
+                Member sucessor=protocol.clusterMembership.findSucessor(this.node_id);
+                Member predecessor=protocol.clusterMembership.findPredecessor(this.node_id);
+
                 File keyFile= new File("./"+node_id+"/"+key+".txt");
                 if(keyFile.exists())
                     keyFile.delete();
@@ -119,6 +122,24 @@ public class Store implements RMIServer{
                 FileWriter fw =new FileWriter(keyFile);
                 fw.write(value);
                 fw.close();
+
+                Socket socketSuc = new Socket("localhost", sucessor.port);
+                Socket socketPre = new Socket("localhost", predecessor.port);
+
+                OutputStream outputSuc = socketSuc.getOutputStream();
+                PrintWriter writerSuc = new PrintWriter(outputSuc, true);
+
+                OutputStream outputPre = socketSuc.getOutputStream();
+                PrintWriter writerPre = new PrintWriter(outputPre, true);
+
+                Message message = new Message(this.node_id, this.store_port, key,value,MessageType.PUT);
+                writerSuc.println(message.toString());
+                writerPre.println(message.toString());
+
+                socketSuc.close();
+                socketPre.close();
+                //mandar duas mensagens put para o antecessor e o sucessor
+                //   Socket socket = new Socket("localhost", porta sucessor e antecessor);
                 return "done: "+key;
             }catch(IOException e){
                 e.printStackTrace();
@@ -131,7 +152,7 @@ public class Store implements RMIServer{
 
                 OutputStream output = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(output, true);
-
+                //mandar put replicate
                 Message message = new Message(this.node_id, this.store_port, key,value,MessageType.PUT);
                 writer.println(message.toString());
 

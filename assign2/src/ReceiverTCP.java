@@ -7,6 +7,8 @@ public class ReceiverTCP implements Runnable {
     private int node_port;
     private String node_id;
 
+    private MembershipProtocol protocol;
+
     public ReceiverTCP(int node_port, String node_id) {
         this.node_port = node_port;
         this.node_id = node_id;
@@ -38,6 +40,14 @@ public class ReceiverTCP implements Runnable {
                         break;
                     case "DELETE":
                         delete(node_id,arrayHeader[3]);
+                        break;
+                    case "PUTREPLICATE":
+                        String lineR;
+                        StringBuilder valueR = new StringBuilder();
+                        while ((lineR = reader.readLine()) != null) {
+                            valueR.append(lineR).append("\n");
+                        }
+                        putReplicate(node_id,arrayHeader[3],valueR.toString());
                 }
             }
         } catch (IOException e) {
@@ -69,5 +79,43 @@ public class ReceiverTCP implements Runnable {
             e.printStackTrace();
         }
     }
+    private void putReplicate(String node_id, String key, String value) {
+        try{
+            Member sucessor=protocol.clusterMembership.findSucessor(this.node_id);
+            Member predecessor=protocol.clusterMembership.findPredecessor(this.node_id);
+
+            File keyFile= new File("./"+node_id+"/"+key+".txt");
+            if(keyFile.exists())
+                keyFile.delete();
+            try {
+                keyFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileWriter fw =new FileWriter(keyFile);
+            fw.write(value);
+            fw.close();
+
+            Socket socketSuc = new Socket("localhost", sucessor.port);
+            Socket socketPre = new Socket("localhost", predecessor.port);
+
+            OutputStream outputSuc = socketSuc.getOutputStream();
+            PrintWriter writerSuc = new PrintWriter(outputSuc, true);
+
+            OutputStream outputPre = socketSuc.getOutputStream();
+            PrintWriter writerPre = new PrintWriter(outputPre, true);
+
+            Message message = new Message(this.node_id, this.node_port, key,value,MessageType.PUT);
+            writerSuc.println(message.toString());
+            writerPre.println(message.toString());
+
+            socketSuc.close();
+            socketPre.close();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+    //put replicate faz o primeiro if do store
+
 
 }
