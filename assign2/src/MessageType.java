@@ -6,4 +6,5 @@ public enum MessageType {
     PUT,
     DELETE,
     PUTREPLICATE,
+    DELETEREPLICATE,
 }

@@ -49,6 +49,10 @@ public class ReceiverTCP implements Runnable {
                             valueR.append(lineR).append("\n");
                         }
                         putReplicate(node_id,arrayHeader[3],valueR.toString());
+                        break;
+                    case "DELETEREPLICATE":
+                        deleteReplicate(node_id,arrayHeader[3]);
+                        break;
                 }
             }
         } catch (IOException e) {
@@ -60,6 +64,35 @@ public class ReceiverTCP implements Runnable {
         File keyFile= new File("./"+node_id+"/"+key+".txt");
         if(keyFile.exists())
             keyFile.delete();
+    }
+    private void deleteReplicate(String node_id, String key) {
+        Member sucessor=protocol.clusterMembership.findSucessor(KeyHash.getSHA256(this.node_id));
+        Member predecessor=protocol.clusterMembership.findPredecessor(KeyHash.getSHA256(this.node_id));
+
+        File keyFile= new File("./"+node_id+"/"+key+".txt");
+        if(keyFile.exists()){
+            keyFile.delete();
+            try {
+                Socket socketSuc = new Socket("localhost", sucessor.port);
+                Socket socketPre = new Socket("localhost", predecessor.port);
+                OutputStream outputSuc = socketSuc.getOutputStream();
+                PrintWriter writerSuc = new PrintWriter(outputSuc, true);
+
+                OutputStream outputPre = socketPre.getOutputStream();
+                PrintWriter writerPre = new PrintWriter(outputPre, true);
+
+                Message message = new Message(this.node_id, this.node_port, key,MessageType.DELETE);
+                writerSuc.println(message.toString());
+                writerPre.println(message.toString());
+
+                socketSuc.close();
+                socketPre.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+
+        }
     }
 
 
@@ -112,13 +145,9 @@ public class ReceiverTCP implements Runnable {
 
             socketSuc.close();
             socketPre.close();
-            //mandar duas mensagens put para o antecessor e o sucessor
-            //   Socket socket = new Socket("localhost", porta sucessor e antecessor)
         }catch(IOException e){
             e.printStackTrace();
         }
     }
-    //put replicate faz o primeiro if do store
-
 
 }

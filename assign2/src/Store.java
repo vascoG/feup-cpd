@@ -138,8 +138,6 @@ public class Store implements RMIServer{
 
                 socketSuc.close();
                 socketPre.close();
-                //mandar duas mensagens put para o antecessor e o sucessor
-                //   Socket socket = new Socket("localhost", porta sucessor e antecessor);
                 return "done: "+key;
             }catch(IOException e){
                 e.printStackTrace();
@@ -207,15 +205,40 @@ public class Store implements RMIServer{
             return "done";
         return "failed";
     }
+/*
 
+
+ */
     @Override
     public String delete(String key) throws RemoteException {
         System.out.println("deleting");
         Member node=protocol.clusterMembership.findSucessor(key);
         if(node.ipAddress.equals(this.node_id)){
+            Member sucessor=protocol.clusterMembership.findSucessor(KeyHash.getSHA256(this.node_id));
+            Member predecessor=protocol.clusterMembership.findPredecessor(KeyHash.getSHA256(this.node_id));
+
             File keyFile= new File("./"+node_id+"/"+key+".txt");
-            if(keyFile.exists())
-               return keyFile.delete()?"done": "failed";
+            if(keyFile.exists()){
+                try {
+                    Socket socketSuc = new Socket("localhost", sucessor.port);
+                    Socket socketPre = new Socket("localhost", predecessor.port);
+                    OutputStream outputSuc = socketSuc.getOutputStream();
+                    PrintWriter writerSuc = new PrintWriter(outputSuc, true);
+
+                    OutputStream outputPre = socketPre.getOutputStream();
+                    PrintWriter writerPre = new PrintWriter(outputPre, true);
+
+                    Message message = new Message(this.node_id, this.store_port, key,MessageType.DELETE);
+                    writerSuc.println(message.toString());
+                    writerPre.println(message.toString());
+
+                    socketSuc.close();
+                    socketPre.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return keyFile.delete()?"done": "failed";
+            }
             else
                 return "failed: this file does not exist";
         }else{
@@ -226,7 +249,7 @@ public class Store implements RMIServer{
                 OutputStream output = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(output, true);
 
-                Message message = new Message(this.node_id, this.store_port, key,MessageType.DELETE);
+                Message message = new Message(this.node_id, this.store_port,key,MessageType.DELETEREPLICATE);
                 writer.println(message.toString());
 
                 socket.close();

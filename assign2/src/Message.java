@@ -56,6 +56,7 @@ public class Message {
     public Message(String ipAddress, int port, String string, MessageType messageType) {
         switch (messageType){
             case DELETE:
+            case DELETEREPLICATE:
                 this.key = string; break;
             case MEMBERSHIP:
                 this.membership_log=string; break;
@@ -131,6 +132,8 @@ public class Message {
                 return "PUTREPLICATE " + this.sender_id + " "+ this.sender_port + " " + this.key + crlf + this.value + last_crlf;
             case DELETE:
                 return "DELETE " + this.sender_id + " "+ this.sender_port + " " + this.key + last_crlf;
+            case DELETEREPLICATE:
+                return "DELETEREPLICATE " + this.sender_id + " "+ this.sender_port + " " + this.key + last_crlf;
             default: 
                 return "ERROR";
         }
