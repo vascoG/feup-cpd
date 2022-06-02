@@ -109,6 +109,7 @@ public class ReceiverUDP implements Runnable {
         }
         else if(message.getMessage_type()==MessageType.MEMBERSHIP){
             this.received_membership=true;
+            protocol.updateMembershipLog(message.getMembershiplog(), this.node_id);
             timer=new Timer();
             timer.schedule(new MembershipMessageTask(), 5*1000);
         }

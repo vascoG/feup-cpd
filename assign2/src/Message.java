@@ -116,6 +116,11 @@ public class Message {
 
     }
 
+    public String getMembershiplog()
+    {
+        return this.membership_log;
+    }
+
     public String toString()
     {
         switch(this.message_type)
