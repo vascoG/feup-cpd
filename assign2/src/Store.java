@@ -46,17 +46,6 @@ public class Store implements RMIServer{
         //writeToLog(node_id + "-0-"+KeyHash.getSHA256(node_id));
     }
 
-    public void writeToLog(String arg) {
-        FileWriter fw;
-        try {
-            //test if there are 32 events to delete the older ones
-            fw = new FileWriter(membership_log);
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void writeToCounter(String arg)
     {
         FileWriter fw;
@@ -193,7 +182,7 @@ public class Store implements RMIServer{
     @Override
     public String join() throws RemoteException {
         System.out.println("joining");
-        if(protocol.join(this.ip_mcast_addr,this.ip_mcast_port,this.node_id,this.store_port))
+        if(protocol.join(this.ip_mcast_addr,this.ip_mcast_port,this.node_id,this.store_port,0))
             return "done";
         return "failed";
     }

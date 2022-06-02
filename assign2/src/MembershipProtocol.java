@@ -18,8 +18,12 @@ public class MembershipProtocol {
 
     public ClusterMembership clusterMembership = new ClusterMembership();
 
-    public boolean join( String ip_mcast_addr, int ip_mcast_port, String node_id, int store_port)
+    public boolean join( String ip_mcast_addr, int ip_mcast_port, String node_id, int store_port, int number)
     {
+        if(number>2){
+            System.out.println("NUMBER OF TRIES TO JOIN EXCEEDED!");
+            return false;
+        }
 
         int membership_counter = getMembershipCounter(node_id);
 
@@ -89,9 +93,8 @@ public class MembershipProtocol {
                 } 
                 catch(SocketTimeoutException e)
                 {
-                    System.out.println("WAITED TO LONG! GOING TO SEND JOIN AGAIN\n");
                     setMembershipCounter(membership_counter, node_id);
-                    join(ip_mcast_addr, ip_mcast_port, node_id, store_port);
+                    join(ip_mcast_addr, ip_mcast_port, node_id, store_port,number+1);
                 }
                 catch (IOException e) {
                     e.printStackTrace();
@@ -293,18 +296,6 @@ public class MembershipProtocol {
         } catch (IOException e) {
             e.printStackTrace();
             return "ERROR";
-        }
-    }
-
-    public void setMembershipLog(String log,String node_id) {
-        FileWriter fw;
-        try {
-            File file = new File("./"+node_id+"/membership_log.txt");
-            fw = new FileWriter(file);
-            fw.write(log);
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
