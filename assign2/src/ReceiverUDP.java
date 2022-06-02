@@ -104,6 +104,7 @@ public class ReceiverUDP implements Runnable {
         }
         else if(message.getMessage_type()==MessageType.LEAVE && !this.node_id.equals(message.getSender_id())){
             System.out.println("LEAVE COUNTER:" + message.getMembership_counter());
+            protocol.updateFilesOnLeave(message,this.node_id,this.node_port);
             protocol.updateMembershipLogOnJoinLeave(message,this.node_id);
         }
         else if(message.getMessage_type()==MessageType.MEMBERSHIP){
