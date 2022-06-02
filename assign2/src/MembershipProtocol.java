@@ -4,6 +4,8 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -34,6 +36,7 @@ public class MembershipProtocol {
                 int join_port;
                 try {
                     serverSocket = new ServerSocket(0);
+                    serverSocket.setSoTimeout(5*1000);
                     join_port = serverSocket.getLocalPort();
                     System.out.println("LISTENING TO PORT " + join_port);
 
@@ -83,7 +86,14 @@ public class MembershipProtocol {
                     }
                 serverSocket.close();
                 System.out.println("CLOSED");
-                } catch (IOException e) {
+                } 
+                catch(SocketTimeoutException e)
+                {
+                    System.out.println("WAITED TO LONG! GOING TO SEND JOIN AGAIN\n");
+                    setMembershipCounter(membership_counter, node_id);
+                    join(ip_mcast_addr, ip_mcast_port, node_id, store_port);
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 }
 
@@ -98,7 +108,6 @@ public class MembershipProtocol {
        
 
         return true;
-        // Atualizar chaves 
     }
 
     public boolean leave(String ip_mcast_addr, int ip_mcast_port, String node_id, int store_port) 
