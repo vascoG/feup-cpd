@@ -9,9 +9,10 @@ public class ReceiverTCP implements Runnable {
 
     private MembershipProtocol protocol;
 
-    public ReceiverTCP(int node_port, String node_id) {
+    public ReceiverTCP(int node_port, String node_id, MembershipProtocol protocol) {
         this.node_port = node_port;
         this.node_id = node_id;
+        this.protocol = protocol;
     }
 
     @Override
@@ -81,8 +82,8 @@ public class ReceiverTCP implements Runnable {
     }
     private void putReplicate(String node_id, String key, String value) {
         try{
-            Member sucessor=protocol.clusterMembership.findSucessor(this.node_id);
-            Member predecessor=protocol.clusterMembership.findPredecessor(this.node_id);
+            Member sucessor=protocol.clusterMembership.findSucessor(KeyHash.getSHA256(this.node_id));
+            Member predecessor=protocol.clusterMembership.findPredecessor(KeyHash.getSHA256(this.node_id));
 
             File keyFile= new File("./"+node_id+"/"+key+".txt");
             if(keyFile.exists())
@@ -102,7 +103,7 @@ public class ReceiverTCP implements Runnable {
             OutputStream outputSuc = socketSuc.getOutputStream();
             PrintWriter writerSuc = new PrintWriter(outputSuc, true);
 
-            OutputStream outputPre = socketSuc.getOutputStream();
+            OutputStream outputPre = socketPre.getOutputStream();
             PrintWriter writerPre = new PrintWriter(outputPre, true);
 
             Message message = new Message(this.node_id, this.node_port, key,value,MessageType.PUT);
@@ -111,6 +112,8 @@ public class ReceiverTCP implements Runnable {
 
             socketSuc.close();
             socketPre.close();
+            //mandar duas mensagens put para o antecessor e o sucessor
+            //   Socket socket = new Socket("localhost", porta sucessor e antecessor)
         }catch(IOException e){
             e.printStackTrace();
         }
