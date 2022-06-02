@@ -1,3 +1,4 @@
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -178,10 +179,25 @@ public class ClusterMembership {
     }
 
     public Member findSucessor(String value){
-        Node node = inOrderSearch(root, value);
+        Node node = inOrderSearchSucessor(root, value);
         if(node==null)
             node=findMinimumPresent(root);
         return node.data;
+    }
+
+    public Member findPredecessor(String value)
+    { 
+        List<Node> list = new ArrayList<Node>();
+        inOrder(root, list);
+        Node first = list.get(0);
+        for(int i = 0; i<list.size()-1;i++)
+        { 
+            if(list.get(i+1).data.hashKey.equals(value))
+                return list.get(i).data;
+        }
+        if(first.data.hashKey.equals(value))
+            return list.get(list.size()-1).data;
+        return first.data;
     }
 
     private Node findMinimumPresent(Node node) {
@@ -199,10 +215,10 @@ public class ClusterMembership {
 		}
 	}
 
-    private Node inOrderSearch(Node node, String value){
+    private Node inOrderSearchSucessor(Node node, String value){
         if(node == null)
             return null;
-        Node left = inOrderSearch(node.left,value);
+        Node left = inOrderSearchSucessor(node.left,value);
         if(left!=null){
                 return left;
         }
@@ -210,7 +226,7 @@ public class ClusterMembership {
         if(node.data.hashKey.compareTo(value)>0 && node.data.isInsideCluster())
             return node;
         else
-            return inOrderSearch(node.right, value);
+            return inOrderSearchSucessor(node.right, value);
     }   
 
 }

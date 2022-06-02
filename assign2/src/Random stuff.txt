@@ -34,7 +34,22 @@ O servidor tem uma pasta associada e dentro tem os ficheiros
 95b02e637e79326243ef8b6d541df5ec89d3c5f468e6f4bb34bcda311fc5784f - 172.0.0.3 - 0
 bf17252ece830bec20d39951393ee7e6f2097ceb12e411dbd1a1a60921bdf844 - 172.0.0.1 - 0
 
+    public static void main (String[]args)
+    {
+        ClusterMembership cm = new ClusterMembership();
+        cm.insert(new Member("teste", 0, 1));
+        cm.insert(new Member("vasco", 0, 1));
+        cm.insert(new Member("joao", 0, 1));
+        cm.insert(new Member("mari", 0, 1));
+        cm.insert(new Member("mariana", 0, 1));
 
+        System.out.println(cm.show());  
+
+        System.out.println(cm.findPredecessor(KeyHash.getSHA256("joao")).ipAddress);
+
+        System.out.println(cm.findSucessor(KeyHash.getSHA256("joao")).ipAddress);
+
+    }
 
 
 TODO: 
