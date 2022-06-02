@@ -56,11 +56,10 @@ public class Message {
     public Message(String ipAddress, int port, String string, MessageType messageType) {
         switch (messageType){
             case DELETE:
+            case DELETEREPLICATE:
                 this.key = string; break;
             case MEMBERSHIP:
                 this.membership_log=string; break;
-            case GET:
-                this.key = string; break;
             default:break;
         }
         this.message_type = messageType;
@@ -129,10 +128,12 @@ public class Message {
                 return "LEAVE " + this.sender_id + " " + this.sender_port + " " + this.membership_counter + last_crlf;
             case PUT: 
                 return "PUT " + this.sender_id + " "+ this.sender_port + " " + this.key + crlf + this.value + last_crlf;
+            case PUTREPLICATE:
+                return "PUTREPLICATE " + this.sender_id + " "+ this.sender_port + " " + this.key + crlf + this.value + last_crlf;
             case DELETE:
                 return "DELETE " + this.sender_id + " "+ this.sender_port + " " + this.key + last_crlf;
-            case GET:
-                return "GET " + this.sender_id + " "+ this.sender_port + " " + this.key + last_crlf;
+            case DELETEREPLICATE:
+                return "DELETEREPLICATE " + this.sender_id + " "+ this.sender_port + " " + this.key + last_crlf;
             default: 
                 return "ERROR";
         }

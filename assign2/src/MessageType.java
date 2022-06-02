@@ -5,5 +5,6 @@ public enum MessageType {
     MEMBERSHIP,
     PUT,
     DELETE,
-    GET,
+    PUTREPLICATE,
+    DELETEREPLICATE,
 }

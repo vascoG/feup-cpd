@@ -30,6 +30,7 @@ O servidor tem uma pasta associada e dentro tem os ficheiros
 
 
 0fe9bb6b02d4691169e233e9e6ba2535b1297e2a3fb4ab08d76640cd5edf317d - 172.0.0.4 - 0
+1003490033f6948b3b6fd39fb6ac05767b3968cc4e9c99cc8ad8ebbae62ee80a - 172.0.0.5 - 0
 4cf6a90bd6bf986c81e48f6e77ab5bc155811f48d522963c5d282ef986527ee6 - 172.0.0.2 - 0
 95b02e637e79326243ef8b6d541df5ec89d3c5f468e6f4bb34bcda311fc5784f - 172.0.0.3 - 0
 bf17252ece830bec20d39951393ee7e6f2097ceb12e411dbd1a1a60921bdf844 - 172.0.0.1 - 0
@@ -55,6 +56,7 @@ bf17252ece830bec20d39951393ee7e6f2097ceb12e411dbd1a1a60921bdf844 - 172.0.0.1 - 0
 TODO: 
 Message - MEMBERSHIP
 MEMBERSHIP - Sleep dinamico para aumentar probabilidade(nao testado) 32 mais recentes?
+IMPROVE PRINTS \n e tal
 LEAVE caso conexao de PUT/GET/DELETE falhe
 
 

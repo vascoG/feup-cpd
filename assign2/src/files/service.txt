@@ -22,22 +22,3 @@ which adds a node to the cluster
 
 leave()
 which removes a node from the cluster
-
-2.3 Service Invocation
-
-A service node should be invoked as follows.
-
-$ java Store <IP_mcast_addr> <IP_mcast_port> <node_id>  <Store_port>
-where:
-
-<IP_mcast_addr>
-is the address of the IP multicast group used by the membership service
-
-<IP_mcast_port>
-is the port number of the IP multicast group used by the membership service
-
-<node_id>
-This is the node's id and it must be unique in a cluster. Ideally, it would be the IP address, but we are not sure if you can use multiple loopback IP addresses in Windows. (This would allow you to test your project by running multiple nodes on the same host, each of which with its own loopback IP address.)
-
-<Store_port>
-is the port number used by the storage service

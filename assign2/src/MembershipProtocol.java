@@ -119,20 +119,23 @@ public class MembershipProtocol {
                 for(File file : directory.listFiles())
                 {
                     String fileName = file.getName();
+                    String key = fileName.split(".txt")[0];
                     if(!fileName.equals("membership_log.txt") && !fileName.equals("membership_counter.txt"))
                     {
                         String value;
+                        if(clusterMembership.findSucessor(KeyHash.getSHA256(key)).ipAddress.equals(node_id)){
                         try {
                             value = Files.readString(Paths.get("./"+node_id + "/" + fileName));
-                            file.delete();
 
-                            Socket socket = new Socket("localhost", newSuccesor.port);
+                            Member successorOfSuccessor = clusterMembership.findSucessor(newSuccesor.hashKey);
+
+                            Socket socket = new Socket("localhost", successorOfSuccessor.port);
                             System.out.println("GOING TO SEND PUT BECAUSE I AM LEAVING");
 
                             OutputStream output = socket.getOutputStream();
                             PrintWriter writer = new PrintWriter(output, true);
 
-                            Message message = new Message(node_id, store_port, fileName,value,MessageType.PUT);
+                            Message message = new Message(node_id, store_port, key,value,MessageType.PUT);
 
                             writer.println(message.toString());
 
@@ -141,6 +144,8 @@ public class MembershipProtocol {
                         e.printStackTrace();
                         }
                     }
+                    file.delete();
+                }
                 }
             }
             
@@ -378,18 +383,20 @@ public class MembershipProtocol {
         File directory = new File("./"+node_id);
         String keyNewNode = KeyHash.getSHA256(message.getSender_id());
         Member successor = clusterMembership.findSucessor(keyNewNode);
+        Member predecessor = clusterMembership.findPredecessor(keyNewNode);
+        Member sucessorOfSucessor = clusterMembership.findSucessor(successor.hashKey);
         if(successor.ipAddress.equals(node_id))
         { 
             for(File file : directory.listFiles())
             {
                 String fileName = file.getName();
+                String key = fileName.split(".txt")[0];
                 if(!fileName.equals("membership_log.txt") && !fileName.equals("membership_counter.txt"))
                 {
-                    if(clusterMembership.findSucessor(fileName).ipAddress.equals(message.getSender_id())){
+                    if(clusterMembership.findSucessor(key).ipAddress.equals(message.getSender_id()) || clusterMembership.findSucessor(key).ipAddress.equals(node_id)){
                     String value;
                     try {
                         value = Files.readString(Paths.get("./"+node_id + "/" + fileName));
-                        file.delete();
 
                         Socket socket = new Socket("localhost", message.getSender_port());
                         System.out.println("GOING TO SEND PUT BECAUSE HE IS JOINING");
@@ -397,7 +404,94 @@ public class MembershipProtocol {
                         OutputStream output = socket.getOutputStream();
                         PrintWriter writer = new PrintWriter(output, true);
 
-                        Message msg = new Message(node_id, node_port, fileName,value,MessageType.PUT);
+                        Message msg = new Message(node_id, node_port, key,value,MessageType.PUT);
+
+                        writer.println(msg.toString());
+
+                        socket.close();
+                    } catch (Exception e) {
+                    e.printStackTrace();
+                    }
+                }
+                else if(clusterMembership.findSucessor(key).ipAddress.equals(predecessor.ipAddress))
+                    file.delete();
+            }
+            }
+            
+        }
+        else if(predecessor.ipAddress.equals(node_id))
+        {
+            for(File file : directory.listFiles())
+            {
+                String fileName = file.getName();
+                String key = fileName.split(".txt")[0];
+                if(!fileName.equals("membership_log.txt") && !fileName.equals("membership_counter.txt"))
+                {
+                    if(clusterMembership.findSucessor(key).ipAddress.equals(node_id)){
+                    String value;
+                    try {
+                        value = Files.readString(Paths.get("./"+node_id + "/" + fileName));
+
+                        Socket socket = new Socket("localhost", message.getSender_port());
+                        System.out.println("GOING TO SEND PUT BECAUSE HE IS JOINING");
+
+                        OutputStream output = socket.getOutputStream();
+                        PrintWriter writer = new PrintWriter(output, true);
+
+                        Message msg = new Message(node_id, node_port, key,value,MessageType.PUT);
+
+                        writer.println(msg.toString());
+
+                        socket.close();
+                    } catch (Exception e) {
+                    e.printStackTrace();
+                    }
+                }
+                else if(clusterMembership.findSucessor(key).ipAddress.equals(successor.ipAddress))
+                    file.delete();
+            }
+            }
+        }
+        else if(sucessorOfSucessor.ipAddress.equals(node_id))
+        {
+            for(File file : directory.listFiles())
+            {
+                String fileName = file.getName();
+                String key = fileName.split(".txt")[0];
+                if(!fileName.equals("membership_log.txt") && !fileName.equals("membership_counter.txt"))
+                {
+                    if(clusterMembership.findSucessor(key).hashKey.equals(keyNewNode))
+                        file.delete();
+            }
+            }
+        }
+    }
+
+    public void updateFilesOnLeave(Message message, String node_id, int node_port) {
+        File directory = new File("./"+node_id);
+        String keyOldNode = KeyHash.getSHA256(message.getSender_id());
+        Member successor = clusterMembership.findSucessor(keyOldNode);
+        Member predecessor = clusterMembership.findPredecessor(keyOldNode);
+        if(successor.ipAddress.equals(node_id))
+        { 
+            for(File file : directory.listFiles())
+            {
+                String fileName = file.getName();
+                String key = fileName.split(".txt")[0];
+                if(!fileName.equals("membership_log.txt") && !fileName.equals("membership_counter.txt"))
+                {
+                    if(clusterMembership.findSucessor(key).ipAddress.equals(node_id) && (key.compareTo(keyOldNode)>0)){
+                    String value;
+                    try {
+                        value = Files.readString(Paths.get("./"+node_id + "/" + fileName));
+
+                        Socket socket = new Socket("localhost", predecessor.port);
+                        System.out.println("GOING TO SEND PUT BECAUSE SOMEONE IS LEAVING");
+
+                        OutputStream output = socket.getOutputStream();
+                        PrintWriter writer = new PrintWriter(output, true);
+
+                        Message msg = new Message(node_id, node_port, key,value,MessageType.PUT);
 
                         writer.println(msg.toString());
 
@@ -409,6 +503,38 @@ public class MembershipProtocol {
             }
             }
             
+        }
+        else if(predecessor.ipAddress.equals(node_id))
+        {
+            for(File file : directory.listFiles())
+            {
+                String fileName = file.getName();
+                String key = fileName.split(".txt")[0];
+                if(!fileName.equals("membership_log.txt") && !fileName.equals("membership_counter.txt"))
+                {
+                    if(clusterMembership.findSucessor(key).ipAddress.equals(node_id)){
+                    String value;
+                    try {
+                        value = Files.readString(Paths.get("./"+node_id + "/" + fileName));
+
+                        Socket socket = new Socket("localhost", successor.port);
+                        System.out.println("GOING TO SEND PUT BECAUSE SOMEONE IS LEAVING");
+
+                        OutputStream output = socket.getOutputStream();
+                        PrintWriter writer = new PrintWriter(output, true);
+
+                        Message msg = new Message(node_id, node_port, key,value,MessageType.PUT);
+
+                        writer.println(msg.toString());
+
+                        socket.close();
+                    } catch (Exception e) {
+                    e.printStackTrace();
+                    }
+                }
+            }
+            }
+
         }
     }
 
