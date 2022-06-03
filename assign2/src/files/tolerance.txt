@@ -1,0 +1,7 @@
+In the specification of the protocols we have strived to cover many common failure scenarios, given our failure model. However, we do not cover all the scenarios.
+
+For example, if a node is down for a long time and it misses many membership events, the periodic MEMBERSHIP messages may not be enough for the node to learn the current membership of the cluster.
+
+Another scenario is the possibility of the membership view of the node to which the client sent a request not being up-to-date and, therefore, the operation request will be sent to the wrong node, i.e. a node that is not responsible for the key.
+
+Making your store tolerant to these failure scenarios or others that you may find, will give you additional credit up to 10%.
