@@ -1,0 +1,9 @@
+CASO DE USO PARA DEMONSTRAR FAULT TOLERANCE:
+
+4 Joins
+Put do ficheiro example.txt
+Desligar o servidor 172.0.0.1
+Put do ficheiro overview.txt
+
+--------
+
