@@ -135,7 +135,7 @@ public class Store implements RMIServer{
         }else{
             try {
                 Socket socket = new Socket("localhost", node.port);
-                System.out.println("GOING TO SEND PUT");
+                System.out.println("GOING TO SEND PUTREPLICATE");
 
                 OutputStream output = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(output, true);
@@ -233,7 +233,7 @@ public class Store implements RMIServer{
         }else{
             try {
                 Socket socket = new Socket("localhost", node.port);
-                System.out.println("GOING TO SEND DELETE");
+                System.out.println("GOING TO SEND DELETEREPLICATE");
 
                 OutputStream output = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(output, true);

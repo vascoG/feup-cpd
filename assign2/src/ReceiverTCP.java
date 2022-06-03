@@ -76,20 +76,39 @@ public class ReceiverTCP implements Runnable {
         if(keyFile.exists()){
             keyFile.delete();
             try {
+                Message message = new Message(this.node_id, this.node_port, key,MessageType.DELETE);
+
+            try {
                 Socket socketSuc = new Socket("localhost", sucessor.port);
-                Socket socketPre = new Socket("localhost", predecessor.port);
                 OutputStream outputSuc = socketSuc.getOutputStream();
                 PrintWriter writerSuc = new PrintWriter(outputSuc, true);
+                writerSuc.println(message.toString());
+                socketSuc.close();
+            } catch (Exception e) {
+                MulticastSocket multi_cast_socket = new MulticastSocket(4003);
+                multi_cast_socket.joinGroup(InetAddress.getByName("224.0.0.0"));
+                String msg = new Message(sucessor.ipAddress, sucessor.port, sucessor.counter+1, MessageType.LEAVE).toString();
+                DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName("224.0.0.0"), 4003);
+                multi_cast_socket.send(datagram_packet);
+                multi_cast_socket.close();
+            }
 
+            try {
+            
+                Socket socketPre = new Socket("localhost", predecessor.port);
                 OutputStream outputPre = socketPre.getOutputStream();
                 PrintWriter writerPre = new PrintWriter(outputPre, true);
-
-                Message message = new Message(this.node_id, this.node_port, key,MessageType.DELETE);
-                writerSuc.println(message.toString());
                 writerPre.println(message.toString());
-
-                socketSuc.close();
                 socketPre.close();
+            } catch (Exception e) {
+                MulticastSocket multi_cast_socket = new MulticastSocket(4003);
+                multi_cast_socket.joinGroup(InetAddress.getByName("224.0.0.0"));
+                String msg = new Message(predecessor.ipAddress, predecessor.port, predecessor.counter+1, MessageType.LEAVE).toString();
+                DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName("224.0.0.0"), 4003);
+                multi_cast_socket.send(datagram_packet);
+                multi_cast_socket.close();
+            }
+           
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
