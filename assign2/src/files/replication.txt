@@ -1,0 +1,9 @@
+The above description does not consider replication. Thus, if the node that stores a key-value pair goes down, that key-value pair becomes unavailable.
+
+To increase availability, key-value pairs should be replicated with a replication factor of 3, i.e. each key-value pair should be stored in 3 different cluster nodes.
+
+The actual number of copies created upon a put can be smaller than 3, e.g. because a node is down. Your implementation should strive to ensure that the number of copies is equal to the replication factor as soon as possible after healing of the fault.
+
+Replication may lead to the execution of operations in different order in different replicas. E.g. a replica may process a delete operation on a key before the respective put. Another issue is the possibility of a node missing a delete operation and later try to replicate the deleted key-pair on the other replicas, upon realizing that the number of copies of the pair is lower than the replication factor. A common solution to handle this issue is the use of "tombstones" for deletion. A "tombstone" is a special key-pair, or marker, indicating that a pair with the corresponding key has been deleted. Thus, instead of removing the key-value pair upon its deletion, you should replace it with its "tombstone".
+
+Handling replication, is worth up to 20% of your final grade.
