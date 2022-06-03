@@ -496,7 +496,7 @@ public class MembershipProtocol {
                 String key = fileName.split(".txt")[0];
                 if(!fileName.equals("membership_log.txt") && !fileName.equals("membership_counter.txt"))
                 {
-                    if(clusterMembership.findSucessor(key).ipAddress.equals(node_id) && (key.compareTo(keyOldNode)>0)){
+                    if(clusterMembership.findSucessor(key).ipAddress.equals(node_id)){
                     String value;
                     try {
                         value = Files.readString(Paths.get("./"+node_id + "/" + fileName));

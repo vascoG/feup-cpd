@@ -1,9 +1,54 @@
-CASO DE USO PARA DEMONSTRAR FAULT TOLERANCE:
+TENTATIVE DE JOIN COM MENOS DE 3 MEMBERSHIPS RECEBIDOS:
 
-4 Joins
+3 Stores
+java TestClient localhost:172.0.0.1 join
+esperar que ele desista 
+Acrescentar 1 nó no store 
+java TestClient localhost:172.0.0.1 join
+
+
+-----------
+
+PUT REPLICATE
+4 JOINS
+java TestClient localhost:172.0.0.1 put ./files/service.txt (guarda no dono (1) e faz replicação no antecessor e sucessor)
+java TestClient localhost:172.0.0.2 put ./files/service.txt (envia mensagem ao no responsável para fazer put e mandar o antecessor e sucessor também)
+(GOING TO SEND PUTREPLICATE)-> mostrar mensagem no nó 2 (ou outro qualquer exceto 1)
+--------
+
+GET REPLICATE
+java TestClient localhost:172.0.0.4 get a4480283519b5d4997477fca5efddb6d3ed13d15cfa7515de5cfd70721aea029 (o dono é o 1 mas o 4 tem ficheiro replicado)
+-----------
+
+GET NUM NÓ QUE NÃO POSSUI O FICHEIRO 
+java TestClient localhost:172.0.0.2 get a4480283519b5d4997477fca5efddb6d3ed13d15cfa7515de5cfd70721aea029
+
+---------------
+
+JOIN DE UM NÓ DEPOIS DE TER FICHEIROS NAS PASTAS
+java TestClient localhost:172.0.0.1 put ./files/overview.txt
+STORE E JOIN DO localhost:172.0.0.5
+Apos join os ficheiros sao reorganizados 
+
+---------------
+
+LEAVE DE UM NÓ QUE TEM FICHEIROS
+java TestClient localhost:172.0.0.5 leave
+(ficheiros foram reorganizados)
+
+---------------
+
+DELETE REPLICATE
+java TestClient localhost:172.0.0.1 delete a4480283519b5d4997477fca5efddb6d3ed13d15cfa7515de5cfd70721aea029 (apaga o ficheiro e os replicados)
+java TestClient localhost:172.0.0.2 delete a4480283519b5d4997477fca5efddb6d3ed13d15cfa7515de5cfd70721aea029 (envia mensagem ao no responsável para fazer delete e mandar o antecessor e sucessor também)
+(GOING TO SEND DELETEREPLICATE)-> mostrar mensagem no nó 2 (ou outro qualquer exceto 1 (depende de onde pedirmos para fazer))
+
+FAULT TOLERANCE:
+
 Put do ficheiro example.txt
 Desligar o servidor 172.0.0.1
 Put do ficheiro overview.txt
 
---------
+membmership atualizar com Joins/membership atualizar com a mensagem ciclica
+
 

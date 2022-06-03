@@ -167,14 +167,13 @@ public class Store implements RMIServer{
                     return "done: " +log;
                 }
                 else{
-                    return "failed, contact one of this nodes: " +node.ipAddress + " " + protocol.clusterMembership.findPredecessor(key) + " " + protocol.clusterMembership.findSucessor(node.hashKey);
+                    return "failed, contact one of this nodes: " +node.ipAddress + " " + protocol.clusterMembership.findPredecessor(node.hashKey).ipAddress + " " + protocol.clusterMembership.findSucessor(node.hashKey).ipAddress;
                 }
             }catch(IOException e){
                 e.printStackTrace();
                 return "failed";
             }
         }
-    }
 
     @Override
     public String join() throws RemoteException {
