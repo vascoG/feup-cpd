@@ -1,4 +1,7 @@
 import java.io.*;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -19,10 +22,10 @@ public class ReceiverTCP implements Runnable {
     public void run() {
         try {
             ServerSocket serverSocket = new ServerSocket(node_port);
-            System.out.println("LISTENING TO PORT (KeyStore Operations)" + node_port);
+            System.out.println("LISTENING TO PORT (KeyStore Operations): " + node_port);
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Accepted conection");
+                System.out.println("Accepted conection KeyStore Operation");
                 InputStream input = socket.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                 String header = reader.readLine();
@@ -130,21 +133,39 @@ public class ReceiverTCP implements Runnable {
             fw.write(value);
             fw.close();
 
-            Socket socketSuc = new Socket("localhost", sucessor.port);
-            Socket socketPre = new Socket("localhost", predecessor.port);
-
-            OutputStream outputSuc = socketSuc.getOutputStream();
-            PrintWriter writerSuc = new PrintWriter(outputSuc, true);
-
-            OutputStream outputPre = socketPre.getOutputStream();
-            PrintWriter writerPre = new PrintWriter(outputPre, true);
-
             Message message = new Message(this.node_id, this.node_port, key,value,MessageType.PUT);
-            writerSuc.println(message.toString());
-            writerPre.println(message.toString());
 
-            socketSuc.close();
-            socketPre.close();
+            try {
+                Socket socketSuc = new Socket("localhost", sucessor.port);
+                OutputStream outputSuc = socketSuc.getOutputStream();
+                PrintWriter writerSuc = new PrintWriter(outputSuc, true);
+                writerSuc.println(message.toString());
+                socketSuc.close();
+            } catch (Exception e) {
+                MulticastSocket multi_cast_socket = new MulticastSocket(4003);
+                multi_cast_socket.joinGroup(InetAddress.getByName("224.0.0.0"));
+                String msg = new Message(sucessor.ipAddress, sucessor.port, sucessor.counter+1, MessageType.LEAVE).toString();
+                DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName("224.0.0.0"), 4003);
+                multi_cast_socket.send(datagram_packet);
+                multi_cast_socket.close();
+            }
+
+            try {
+            
+                Socket socketPre = new Socket("localhost", predecessor.port);
+                OutputStream outputPre = socketPre.getOutputStream();
+                PrintWriter writerPre = new PrintWriter(outputPre, true);
+                writerPre.println(message.toString());
+                socketPre.close();
+            } catch (Exception e) {
+                MulticastSocket multi_cast_socket = new MulticastSocket(4003);
+                multi_cast_socket.joinGroup(InetAddress.getByName("224.0.0.0"));
+                String msg = new Message(predecessor.ipAddress, predecessor.port, predecessor.counter+1, MessageType.LEAVE).toString();
+                DatagramPacket datagram_packet = new DatagramPacket(msg.getBytes(), msg.length(),InetAddress.getByName("224.0.0.0"), 4003);
+                multi_cast_socket.send(datagram_packet);
+                multi_cast_socket.close();
+            }
+           
         }catch(IOException e){
             e.printStackTrace();
         }

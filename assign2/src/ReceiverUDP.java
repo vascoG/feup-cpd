@@ -53,20 +53,34 @@ public class ReceiverUDP implements Runnable {
         Thread sendMembershipThread = new Thread(new Runnable() {
             @Override
             public void run() {
-               {
+               {   
+                   System.out.println("LISTENING TO PORT (Membership Operations): " + port);
                    while(true)
                    {
                        try {
-                        Thread.sleep((new Random().nextInt(11)+1)*10);
+                        int random = (new Random().nextInt(100)+1);
+        
+                        String log = protocol.getMembershipLog(node_id);
+                        if(log.isEmpty())
+                            random+=500;
+                        else
+                            random+=500/log.length();
+                
+                        try {
+                            Thread.sleep(random);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
                         if(!received_membership)
                         {
-                            String log = protocol.getMembershipLog(node_id);
                             if(log.isEmpty())
                                 continue;
                             String message = new Message(ipAddress, port, log, MessageType.MEMBERSHIP).toString();
                             DatagramPacket datagram_packet = new DatagramPacket(message.getBytes(), message.length(),InetAddress.getByName(ipAddress), port);
 
                             System.out.println("SENT MULTICAST MESSAGE");
+
+                            received_membership = true;
 
                             multi_cast_socket.send(datagram_packet);
                         }
@@ -103,7 +117,6 @@ public class ReceiverUDP implements Runnable {
             protocol.updateFilesOnJoin(message,this.node_id, this.node_port);
         }
         else if(message.getMessage_type()==MessageType.LEAVE && !this.node_id.equals(message.getSender_id())){
-            System.out.println("LEAVE COUNTER:" + message.getMembership_counter());
             protocol.updateFilesOnLeave(message,this.node_id,this.node_port);
             protocol.updateMembershipLogOnJoinLeave(message,this.node_id);
         }

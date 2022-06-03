@@ -269,8 +269,6 @@ public class Store implements RMIServer{
             RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(obj, 0);
             Registry registry = LocateRegistry.getRegistry();
             registry.bind(obj.getNode_id(), stub);
-
-            System.err.println("Server ready");
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();

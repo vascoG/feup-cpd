@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -42,7 +41,7 @@ public class MembershipProtocol {
                     serverSocket = new ServerSocket(0);
                     serverSocket.setSoTimeout(5*1000);
                     join_port = serverSocket.getLocalPort();
-                    System.out.println("LISTENING TO PORT " + join_port);
+                    System.out.println("LISTENING TO PORT FOR JOIN: " + join_port);
 
                     new Thread(new Runnable() {
 
@@ -84,12 +83,11 @@ public class MembershipProtocol {
                          String membership = membershipBuilder.toString();
                         System.out.println(membership);
                         updateMembershipLog(membership,node_id);
-                        //TODO: Better while condition (different logs?)
                         socket.close();
                         counter++;
                     }
                 serverSocket.close();
-                System.out.println("CLOSED");
+                System.out.println("CLOSED JOIN PORT");
                 } 
                 catch(SocketTimeoutException e)
                 {
@@ -195,10 +193,8 @@ public class MembershipProtocol {
             List<String> resultLog = new ArrayList<>();
             if(fr.length()==0)
             {   
-                resultLog.addAll(Arrays.asList(arrayReceivedLog));
                 fw = new FileWriter(file);
-                String log = String.join("\n", resultLog);
-                fw.write(log);
+                fw.write(membership);
                 fw.close();
                 for(int i = 0 ; i<arrayReceivedLog.length;i++)
                 {
@@ -227,7 +223,8 @@ public class MembershipProtocol {
                             break;
                         else
                         {
-                            resultLog.set(j, arrayReceivedLog[i]);
+                            resultLog.remove(j);
+                            resultLog.add(arrayReceivedLog[i]);
                             break;
                         }
                     }   
@@ -238,7 +235,16 @@ public class MembershipProtocol {
             }
 
             fw = new FileWriter(file);
-            String log = String.join("\n", resultLog);
+            StringBuilder logbuilder  = new StringBuilder();
+            int initial = 0;
+            if(resultLog.size()>32)
+                initial = resultLog.size()-32;
+            for(int i = initial;i<resultLog.size();i++)
+            {
+                logbuilder.append(resultLog.get(i));
+                logbuilder.append("\n");
+            }
+            String log = logbuilder.toString();
             fw.write(log);
             fw.close();
         } catch (IOException e) {
@@ -266,9 +272,7 @@ public class MembershipProtocol {
         }
         
         try {
-            System.out.println("TRYING TO CONNECT TO SOCKET " + sender_port);
             Socket socket = new Socket("localhost", sender_port);
-            System.out.println("CONNECTED");
 
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true);
@@ -356,12 +360,24 @@ public class MembershipProtocol {
             if(fr.length()==0)
                 {
                     fw = new FileWriter(file,false);
-                   log=message.getSender_id() + "-" + message.getMembership_counter()+"-"+message.getSender_port();
+                   log=message.getSender_id() + "-" + message.getMembership_counter()+"-"+message.getSender_port() + "\n";
                 }
             else
-                {
+                {   
                     fw = new FileWriter(file,true);
-                    log= "\n" + message.getSender_id() + "-" + message.getMembership_counter()+"-"+message.getSender_port();
+                    if(arrayLog.length<32){
+                    log= message.getSender_id() + "-" + message.getMembership_counter()+"-"+message.getSender_port() + "\n";
+                    }
+                    else
+                    {
+                        StringBuilder logbuilder = new StringBuilder();
+                        for(int i = 1;i<arrayLog.length;i++)
+                        {
+                            logbuilder.append(arrayLog[i]);
+                            logbuilder.append("\n");
+                        }
+                        log = logbuilder.toString();
+                    }
                 }fw.write(log);
             fw.close();
         } catch (IOException e) {
