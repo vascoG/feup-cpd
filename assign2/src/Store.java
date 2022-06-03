@@ -160,7 +160,6 @@ public class Store implements RMIServer{
     public String get(String key) throws RemoteException {
 
         Member node=protocol.clusterMembership.findSucessor(key);
-        if(node.ipAddress.equals(this.node_id)){
             try{
                 File keyFile= new File("./"+node_id+"/"+key+".txt");
                 if(keyFile.exists()){
@@ -168,14 +167,12 @@ public class Store implements RMIServer{
                     return "done: " +log;
                 }
                 else{
-                    return "failed";
+                    return "failed, contact one of this nodes: " +node.ipAddress + " " + protocol.clusterMembership.findPredecessor(key) + " " + protocol.clusterMembership.findSucessor(node.hashKey);
                 }
             }catch(IOException e){
                 e.printStackTrace();
                 return "failed";
             }
-        }else{
-            return "contact this node: " +node.ipAddress;
         }
     }
 
